@@ -46,7 +46,8 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref AnswerKingVPC
-      CidrBlock: 10.0.1.0/24
+      CidrBlock: 10.0.3.0/24
+      AvailabilityZone: eu-west-2b
       Tags:
         - Key: Name
           Value: AnswerKing-Subnet
@@ -64,7 +65,8 @@ Resources:
     Type: AWS::EC2::Subnet
     Properties:
       VpcId: !Ref AnswerKingVPC
-      CidrBlock: 10.0.2.0/24
+      CidrBlock: 10.0.4.0/24
+      AvailabilityZone: eu-west-2a
       Tags:
         - Key: Name
           Value: AnswerKing-Subnet-2
@@ -94,7 +96,7 @@ Outputs:
   
   Subnet2Id:
     Description: AnswerKing Subnet 2 ID 
-    Value: !Ref AnswerKingSubnet
+    Value: !Ref AnswerKingSubnet2
     Export:
       Name: Subnet2ID
 
