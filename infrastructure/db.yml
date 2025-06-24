@@ -1,12 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'RDS infrastructure for AnswerKing API'
 
-Parameters:    
-  Environment:
-    Type: String
-    Default: "dev"
-    Description: "Environment name"
-    
+Parameters:
   Project:
     Type: String
     Default: "AnswerKing-API"
@@ -21,5 +16,61 @@ Parameters:
     Type: String
     Default: "AnswerAcademy"
     Description: "Cost centre for tagging"
+  
+  ManagedBy:
+    Type: String
+    Default: "Cloudformation"
 
+  DBUsername:
+    Type: String
+    NoEcho: true
+  
+  DBPassword:
+    Type: String
+    NoEcho: true
 
+Resources:
+  AnswerKingDB:
+    Type: AWS::RDS::DBInstance
+    Properties:
+      DBSubnetGroupName: { Ref: DBSubnetGroup }
+      DBName: AnswerKingAPI
+      Engine: postgres
+      DBInstanceClass: db.t3.micro
+      AllocatedStorage: 20
+      DBInstanceIdentifier: AnswerKingDB
+      MasterUsername: !Ref DBUsername
+      MasterUserPassword: !Ref DBPassword
+      PubliclyAccessible: false
+      VPCSecurityGroups:
+          - { Ref: RDSSecurityGroup }
+      Tags:
+        - Key: Name
+          Value: AnswerKingDB
+        - Key: Project
+          Value: !Ref Project
+        - Key: CostCentre
+          Value: !Ref CostCentre
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: ManagedBy
+          Value: !Ref ManagedBy
+        - Key: Type
+          Value: RDS
+  DBSubnetGroup:
+    Type: AWS::RDS::DBSubnetGroup
+    Properties:
+      DBSubnetGroupDescription: My DB Subnet Group
+      SubnetIds: 
+        - !ImportValue Subnet1ID
+        - !ImportValue Subnet2ID
+  RDSSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security group for RDS
+      VpcId: !ImportValue AnswerKingVPCID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 3306
+          ToPort: 3306
+          CidrIp: 10.0.1.0/24
