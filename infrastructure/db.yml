@@ -64,6 +64,19 @@ Resources:
       SubnetIds: 
         - !ImportValue Subnet1ID
         - !ImportValue Subnet2ID
+      Tags:
+        - Key: Name
+          Value: AnswerKingDBSubnetGroup
+        - Key: Project
+          Value: !Ref Project
+        - Key: CostCentre
+          Value: !Ref CostCentre
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: ManagedBy
+          Value: !Ref ManagedBy
+        - Key: Type
+          Value: DBSubnetGroup
   RDSSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
@@ -74,3 +87,16 @@ Resources:
           FromPort: 3306
           ToPort: 3306
           CidrIp: 10.0.1.0/24
+      Tags:
+        - Key: Name
+          Value: AnswerKingDBSecurityGroup
+        - Key: Project
+          Value: !Ref Project
+        - Key: CostCentre
+          Value: !Ref CostCentre
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: ManagedBy
+          Value: !Ref ManagedBy
+        - Key: Type
+          Value: SecurityGroup
