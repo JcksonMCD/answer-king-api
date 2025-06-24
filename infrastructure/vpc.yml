@@ -60,12 +60,41 @@ Resources:
           Value: !Ref ManagedBy
         - Key: Type
           Value: Subnet
+  AnswerKingSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref AnswerKingVPC
+      CidrBlock: 10.0.2.0/24
+      Tags:
+        - Key: Name
+          Value: AnswerKing-Subnet-2
+        - Key: Project
+          Value: !Ref Project
+        - Key: CostCentre
+          Value: !Ref CostCentre
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: ManagedBy
+          Value: !Ref ManagedBy
+        - Key: Type
+          Value: Subnet
 
 Outputs:
   AnswerKingVPCId:
     Description: AnswerKing VPC ID
     Value: !Ref AnswerKingVPC
+    Export:
+      Name: AnswerKingVPCID 
 
   Subnet1Id:
     Description: AnswerKing Subnet ID
     Value: !Ref AnswerKingSubnet
+    Export:
+      Name: Subnet1ID
+  
+  Subnet2Id:
+    Description: AnswerKing Subnet 2 ID 
+    Value: !Ref AnswerKingSubnet
+    Export:
+      Name: Subnet2ID
+
