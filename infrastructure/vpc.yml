@@ -40,3 +40,12 @@ Resources:
           Value: "CloudFormation"
         - Key: Type
           Value: Subnet
+
+Outputs:
+  AnswerKingVPCId:
+    Description: AnswerKing VPC ID
+    Value: !Ref AnswerKingVPC
+
+  Subnet1Id:
+    Description: AnswerKing Subnet ID
+    Value: !Ref AnswerKingSubnet
