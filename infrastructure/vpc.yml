@@ -1,0 +1,42 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'VPC for AnswerKing'
+
+Resources:
+  AnswerKingVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsHostnames: true
+      EnableDnsSupport: true
+      Tags:
+        - Key: Name
+          Value: AnswerKingVPC
+        - Key: Project
+          Value: "AnswerKing-API"
+        - Key: CostCentre
+          Value: "AnswerAcademy"
+        - Key: Owner
+          Value: "jackson.macdonald@answerdigital.com"
+        - Key: ManagedBy
+          Value: "CloudFormation"
+        - Key: Type
+          Value: VPC
+  
+  AnswerKingSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref AnswerKingVPC
+      CidrBlock: 10.0.1.0/24
+      Tags:
+        - Key: Name
+          Value: AnswerKing-Subnet
+        - Key: Project
+          Value: "AnswerKing-API"
+        - Key: CostCentre
+          Value: "AnswerAcademy"
+        - Key: Owner
+          Value: "jackson.macdonald@answerdigital.com"
+        - Key: ManagedBy
+          Value: "CloudFormation"
+        - Key: Type
+          Value: Subnet
