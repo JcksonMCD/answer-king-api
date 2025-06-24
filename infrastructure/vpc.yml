@@ -81,6 +81,47 @@ Resources:
         - Key: Type
           Value: Subnet
 
+  AnswerKingInternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: AnswerKingIGW
+
+  AttachGateway:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref AnswerKingVPC
+      InternetGatewayId: !Ref AnswerKingInternetGateway
+
+  AnswerKingPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref AnswerKingVPC
+      Tags:
+        - Key: Name
+          Value: AnswerKingPublicRouteTable
+
+  DefaultPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: AttachGateway
+    Properties:
+      RouteTableId: !Ref AnswerKingPublicRouteTable
+      DestinationCidrBlock: 0.0.0.0/0
+      GatewayId: !Ref AnswerKingInternetGateway
+
+  Subnet1RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref AnswerKingSubnet
+      RouteTableId: !Ref AnswerKingPublicRouteTable
+
+  Subnet2RouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref AnswerKingSubnet2
+      RouteTableId: !Ref AnswerKingPublicRouteTable
+
 Outputs:
   AnswerKingVPCId:
     Description: AnswerKing VPC ID
