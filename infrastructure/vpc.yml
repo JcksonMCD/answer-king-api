@@ -1,6 +1,26 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Description: 'VPC for AnswerKing'
 
+Parameters:
+  Project:
+    Type: String
+    Default: "AnswerKing-API"
+    Description: "Project name"
+    
+  Owner:
+    Type: String
+    Default: "jackson.macdonald@answerdigital.com"
+    Description: "Resource owner"
+
+  CostCentre:
+    Type: String
+    Default: "AnswerAcademy"
+    Description: "Cost centre for tagging"
+  
+  ManagedBy:
+    Type: String
+    Default: "Cloudformation"
+
 Resources:
   AnswerKingVPC:
     Type: AWS::EC2::VPC
@@ -12,13 +32,13 @@ Resources:
         - Key: Name
           Value: AnswerKingVPC
         - Key: Project
-          Value: "AnswerKing-API"
+          Value: !Ref Project
         - Key: CostCentre
-          Value: "AnswerAcademy"
+          Value: !Ref CostCentre
         - Key: Owner
-          Value: "jackson.macdonald@answerdigital.com"
+          Value: !Ref Owner
         - Key: ManagedBy
-          Value: "CloudFormation"
+          Value: !Ref ManagedBy
         - Key: Type
           Value: VPC
   
@@ -31,13 +51,13 @@ Resources:
         - Key: Name
           Value: AnswerKing-Subnet
         - Key: Project
-          Value: "AnswerKing-API"
+          Value: !Ref Project
         - Key: CostCentre
-          Value: "AnswerAcademy"
+          Value: !Ref CostCentre
         - Key: Owner
-          Value: "jackson.macdonald@answerdigital.com"
+          Value: !Ref Owner
         - Key: ManagedBy
-          Value: "CloudFormation"
+          Value: !Ref ManagedBy
         - Key: Type
           Value: Subnet
 
