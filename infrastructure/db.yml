@@ -1,0 +1,25 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'RDS infrastructure for AnswerKing API'
+
+Parameters:    
+  Environment:
+    Type: String
+    Default: "dev"
+    Description: "Environment name"
+    
+  Project:
+    Type: String
+    Default: "AnswerKing-API"
+    Description: "Project name"
+    
+  Owner:
+    Type: String
+    Default: "jackson.macdonald@answerdigital.com"
+    Description: "Resource owner"
+
+  CostCentre:
+    Type: String
+    Default: "AnswerAcademy"
+    Description: "Cost centre for tagging"
+
+
