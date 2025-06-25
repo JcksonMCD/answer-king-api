@@ -8,19 +8,41 @@ Resources:
   AnswerKingApiGateway:
     Type: AWS::Serverless::Api
     Properties:
-      Name: Basic AWS Api Gateway
+      Name: Answer King API
       StageName: Development
+  Psycopg2LambdaLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: psycopg2-lambda-layer
+      ContentUri: ./api/layer-code/psycopg2.zip
+      CompatibleRuntimes:
+        - python3.11
+  CreateItemFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./api/create.zip
+      Handler: create.lambda_handler
+      Layers: 
+        - !Ref Psycopg2LambdaLayer
+      Runtime: python3.11
+      Events:
+        AnswerKingApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AnswerKingApiGateway
+            Path: /item
+            Method: POST
  
 Outputs:
   AnswerKingApiGateway:
-    Description: 'API Gateway endpoint URL for Staging stage for Hello World function'
+    Description: 'API Gateway endpoint URL for Development stage for create item'
     Value: !Sub 'https://${AnswerKingApiGateway}.execute-api.${AWS::Region}.amazonaws.com/Staging/hello/'
-  BasicAWSApiGatewayRestApiId:
-    Description: 'API Gateway ARN for Basic AWS API Gateway'
-    Value: !Ref BasicAWSApiGateway
+  AnswerKingAWSApiGatewayRestApiId:
+    Description: 'API Gateway ARN for Answer King API'
+    Value: !Ref AnswerKingApiGateway
     Export:
-      Name: BasicAWSApiGateway-RestApiId
-  BasicAWSApiGatewayRootResourceId:
-    Value: !GetAtt BasicAWSApiGateway.RootResourceId
+      Name: AnswerKingApiGateway-RestApiId
+  AnswerKingApiGatewayRootResourceId:
+    Value: !GetAtt AnswerKingApiGateway.RootResourceId
     Export:
-      Name: BasicAWSApiGateway-RootResourceId
+      Name: AnswerKingApiGateway-RootResourceId
