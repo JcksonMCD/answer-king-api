@@ -41,7 +41,7 @@ Resources:
       DBInstanceIdentifier: AnswerKingDB
       MasterUsername: !Ref DBUsername
       MasterUserPassword: !Ref DBPassword
-      PubliclyAccessible: false
+      PubliclyAccessible: true
       VPCSecurityGroups:
           - { Ref: RDSSecurityGroup }
       Tags:
@@ -87,6 +87,10 @@ Resources:
           FromPort: 3306
           ToPort: 3306
           CidrIp: 10.0.1.0/24
+        - IpProtocol: tcp
+          FromPort: 5432
+          ToPort: 5432
+          CidrIp: 188.39.219.34/32
       Tags:
         - Key: Name
           Value: AnswerKingDBSecurityGroup
