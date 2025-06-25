@@ -1,6 +1,5 @@
 import os
 import json
-import psycopg2
 
 def lambda_handler(event, context):
     # Parse and validate request
