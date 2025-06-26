@@ -21,7 +21,7 @@ Resources:
   CreateItemFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/create/
+      CodeUri: ./api/create-item/
       Handler: create_item.lambda_handler
       Runtime: python3.13
       Timeout: 10
