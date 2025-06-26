@@ -1,8 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: >
-  AnswerKing API Gateway
-  Sample SAM Template for basic-aws-apigateway-demo
+  AnswerKing API Gateway SAM template for Lambda and API Gateway resource creation.
 
 Parameters:
   DBUser:
