@@ -121,6 +121,24 @@ Resources:
           Value: !Ref ManagedBy
         - Key: Type
           Value: RouteTable
+  
+  AnswerKingPrivateRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref AnswerKingVPC
+      Tags:
+        - Key: Name
+          Value: AnswerKingPrivateRouteTable
+        - Key: Project
+          Value: !Ref Project
+        - Key: CostCentre
+          Value: !Ref CostCentre
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: ManagedBy
+          Value: !Ref ManagedBy
+        - Key: Type
+          Value: RouteTable
 
   DefaultPublicRoute:
     Type: AWS::EC2::Route
@@ -134,13 +152,13 @@ Resources:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref AnswerKingSubnet
-      RouteTableId: !Ref AnswerKingPublicRouteTable
+      RouteTableId: !Ref AnswerKingPrivateRouteTable
 
   Subnet2RouteTableAssociation:
     Type: AWS::EC2::SubnetRouteTableAssociation
     Properties:
       SubnetId: !Ref AnswerKingSubnet2
-      RouteTableId: !Ref AnswerKingPublicRouteTable
+      RouteTableId: !Ref AnswerKingPrivateRouteTable
 
 Outputs:
   AnswerKingVPCId:
