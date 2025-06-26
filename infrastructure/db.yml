@@ -41,7 +41,12 @@ Resources:
       DBInstanceIdentifier: AnswerKingDB
       MasterUsername: !Ref DBUsername
       MasterUserPassword: !Ref DBPassword
-      PubliclyAccessible: true
+      PubliclyAccessible: false
+      VPCEndpoint:
+        Type: AWS::EC2::VPCEndpoint
+        Properties:
+          ServiceName: !Sub com.amazonaws.${AWS::Region}.ec2
+          VpcId: !ImportValue AnswerKingVPCID
       VPCSecurityGroups:
         - !Ref RDSSecurityGroup
       Tags:
