@@ -3,6 +3,15 @@ Transform: AWS::Serverless-2016-10-31
 Description: >
   AnswerKing API Gateway
   Sample SAM Template for basic-aws-apigateway-demo
+
+Parameters:
+  DBUser:
+    Type: String
+    NoEcho: true
+  
+  DBPass:
+    Type: String
+    NoEcho: true
   
 Resources:
   AnswerKingApiGateway:
@@ -10,21 +19,26 @@ Resources:
     Properties:
       Name: Answer King API
       StageName: Development
-  Psycopg2LambdaLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: psycopg2-lambda-layer
-      ContentUri: ./api/layer-code/psycopg2.zip
-      CompatibleRuntimes:
-        - python3.11
   CreateItemFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/create.zip
+      CodeUri: ./api/create/
       Handler: create.lambda_handler
-      Layers: 
-        - !Ref Psycopg2LambdaLayer
-      Runtime: python3.11
+      Runtime: python3.13
+      Timeout: 10
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue LambdaSecurityGroupID
+        SubnetIds:
+          - !ImportValue Subnet1ID
+          - !ImportValue Subnet2ID
+      Environment:
+        Variables:
+          DB_NAME: AnswerKingAPI
+          DB_USER: !Ref DBUser
+          DB_PASS: !Ref DBPass
+          DB_HOST: !ImportValue AnswerKingDBHost
+          DB_PORT: "5432"
       Events:
         AnswerKingApi:
           Type: Api
