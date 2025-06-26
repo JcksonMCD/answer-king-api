@@ -88,6 +88,16 @@ Resources:
       Tags:
         - Key: Name
           Value: LambdaSecurityGroup
+        - Key: Project
+          Value: !Ref Project
+        - Key: CostCentre
+          Value: !Ref CostCentre
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: ManagedBy
+          Value: !Ref ManagedBy
+        - Key: Type
+          Value: SecurityGroup
   RDSSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
