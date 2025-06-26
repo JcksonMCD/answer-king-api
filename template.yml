@@ -22,7 +22,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./api/create/
-      Handler: create.lambda_handler
+      Handler: create_item.lambda_handler
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
