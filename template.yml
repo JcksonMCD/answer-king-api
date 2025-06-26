@@ -76,7 +76,7 @@ Resources:
 Outputs:
   AnswerKingApiGateway:
     Description: 'API Gateway endpoint URL for Development stage for create item'
-    Value: !Sub 'https://${AnswerKingApiGateway}.execute-api.${AWS::Region}.amazonaws.com/Staging/hello/'
+    Value: !Sub 'https://${AnswerKingApiGateway}.execute-api.${AWS::Region}.amazonaws.com/Development'
   AnswerKingAWSApiGatewayRestApiId:
     Description: 'API Gateway ARN for Answer King API'
     Value: !Ref AnswerKingApiGateway
