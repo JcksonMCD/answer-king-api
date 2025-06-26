@@ -87,6 +87,16 @@ Resources:
       Tags:
         - Key: Name
           Value: AnswerKingIGW
+        - Key: Project
+          Value: !Ref Project
+        - Key: CostCentre
+          Value: !Ref CostCentre
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: ManagedBy
+          Value: !Ref ManagedBy
+        - Key: Type
+          Value: InternetGateway
 
   AttachGateway:
     Type: AWS::EC2::VPCGatewayAttachment
@@ -101,6 +111,16 @@ Resources:
       Tags:
         - Key: Name
           Value: AnswerKingPublicRouteTable
+        - Key: Project
+          Value: !Ref Project
+        - Key: CostCentre
+          Value: !Ref CostCentre
+        - Key: Owner
+          Value: !Ref Owner
+        - Key: ManagedBy
+          Value: !Ref ManagedBy
+        - Key: Type
+          Value: RouteTable
 
   DefaultPublicRoute:
     Type: AWS::EC2::Route
