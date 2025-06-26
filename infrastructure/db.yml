@@ -122,3 +122,8 @@ Outputs:
     Value: !Ref LambdaSecurityGroup
     Export:
       Name: LambdaSecurityGroupID
+  AnswerKingDBHost:
+    Description: The database endpoint address
+    Value: !GetAtt AnswerKingDB.Endpoint.Address
+    Export:
+      Name: AnswerKingDBHost
