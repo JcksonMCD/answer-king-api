@@ -1,1 +1,88 @@
-# SAM template
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  AnswerKing API Gateway SAM template for Lambda and API Gateway resource creation.
+
+Parameters:
+  DBUser:
+    Type: String
+    NoEcho: true
+  
+  DBPass:
+    Type: String
+    NoEcho: true
+  
+Resources:
+  AnswerKingApiGateway:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: Answer King API
+      StageName: Development
+  CreateItemFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./api/create-item/
+      Handler: create_item.lambda_handler
+      Runtime: python3.13
+      Timeout: 10
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue LambdaSecurityGroupID
+        SubnetIds:
+          - !ImportValue Subnet1ID
+          - !ImportValue Subnet2ID
+      Environment:
+        Variables:
+          DB_NAME: AnswerKingAPI
+          DB_USER: !Ref DBUser
+          DB_PASS: !Ref DBPass
+          DB_HOST: !ImportValue AnswerKingDBHost
+          DB_PORT: "5432"
+      Events:
+        AnswerKingApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AnswerKingApiGateway
+            Path: /item
+            Method: POST
+  DeleteItemFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./api/remove-item/
+      Handler: remove_item.lambda_handler
+      Runtime: python3.13
+      Timeout: 10
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue LambdaSecurityGroupID
+        SubnetIds:
+          - !ImportValue Subnet1ID
+          - !ImportValue Subnet2ID
+      Environment:
+        Variables:
+          DB_NAME: AnswerKingAPI
+          DB_USER: !Ref DBUser
+          DB_PASS: !Ref DBPass
+          DB_HOST: !ImportValue AnswerKingDBHost
+          DB_PORT: "5432"
+      Events:
+        AnswerKingApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AnswerKingApiGateway
+            Path: /item/{id}
+            Method: DELETE
+ 
+Outputs:
+  AnswerKingApiGateway:
+    Description: 'API Gateway endpoint URL for Development stage for create item'
+    Value: !Sub 'https://${AnswerKingApiGateway}.execute-api.${AWS::Region}.amazonaws.com/Development'
+  AnswerKingAWSApiGatewayRestApiId:
+    Description: 'API Gateway ARN for Answer King API'
+    Value: !Ref AnswerKingApiGateway
+    Export:
+      Name: AnswerKingApiGateway-RestApiId
+  AnswerKingApiGatewayRootResourceId:
+    Value: !GetAtt AnswerKingApiGateway.RootResourceId
+    Export:
+      Name: AnswerKingApiGateway-RootResourceId
