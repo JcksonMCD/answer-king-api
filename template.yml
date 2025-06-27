@@ -72,6 +72,60 @@ Resources:
             RestApiId: !Ref AnswerKingApiGateway
             Path: /item/{id}
             Method: DELETE
+  GetAllItemsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./api/get-all-items/
+      Handler: get_all_items.lambda_handler
+      Runtime: python3.13
+      Timeout: 10
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue LambdaSecurityGroupID
+        SubnetIds:
+          - !ImportValue Subnet1ID
+          - !ImportValue Subnet2ID
+      Environment:
+        Variables:
+          DB_NAME: AnswerKingAPI
+          DB_USER: !Ref DBUser
+          DB_PASS: !Ref DBPass
+          DB_HOST: !ImportValue AnswerKingDBHost
+          DB_PORT: "5432"
+      Events:
+        AnswerKingApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AnswerKingApiGateway
+            Path: /item
+            Method: GET
+  GetItemByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./api/get-item-by-id/
+      Handler: get_item_by_id.lambda_handler
+      Runtime: python3.13
+      Timeout: 10
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue LambdaSecurityGroupID
+        SubnetIds:
+          - !ImportValue Subnet1ID
+          - !ImportValue Subnet2ID
+      Environment:
+        Variables:
+          DB_NAME: AnswerKingAPI
+          DB_USER: !Ref DBUser
+          DB_PASS: !Ref DBPass
+          DB_HOST: !ImportValue AnswerKingDBHost
+          DB_PORT: "5432"
+      Events:
+        AnswerKingApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AnswerKingApiGateway
+            Path: /item/{id}
+            Method: GET
  
 Outputs:
   AnswerKingApiGateway:
