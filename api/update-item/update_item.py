@@ -34,16 +34,10 @@ def lambda_handler(event, context):
                     """
                     UPDATE items
                     SET name = %s, price = %s, description = %s
-                    WHERE id = %s;
+                    WHERE id = %s
+                    RETURNING *;
                     """,
                     (name, price, description, item_id)
-                )
-                cursor.execute(
-                    """
-                    SELECT * FROM items
-                    WHERE id = %s;
-                    """,
-                    (item_id,)
                 )
                 row = cursor.fetchone()
                 if not row:
