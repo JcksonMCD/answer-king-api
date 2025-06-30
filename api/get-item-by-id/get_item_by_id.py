@@ -14,7 +14,7 @@ def lambda_handler(event, context):
     except (KeyError, TypeError, ValueError):
         return {
             'statusCode': 400,
-            'body': json.dumps({'error': 'Invalid or missing id in path'})
+            'body': json.dumps({'error': 'Invalid or missing ID in path'})
         }
     
     try:
@@ -37,7 +37,7 @@ def lambda_handler(event, context):
                 if not row:
                     return {
                         'statusCode': 404,
-                        'body': json.dumps({'error': 'Item not found'})
+                        'body': json.dumps({'error': f'Item not found at ID: {item_id}'})
                     }
                 
                 colnames = [desc[0] for desc in cursor.description]
