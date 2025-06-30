@@ -18,7 +18,12 @@ def lambda_handler(event, context):
             port=os.environ['DB_PORT']
         ) as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM categories;")
+                cursor.execute(
+                    """
+                    SELECT id, name, created_at FROM categories
+                    WHERE deleted = false;
+                    """
+                    )
                 rows = cursor.fetchall()
                 columns = [desc[0] for desc in cursor.description]
                 categories = [dict(zip(columns, row)) for row in rows]
