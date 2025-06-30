@@ -316,7 +316,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref AnswerKingApiGateway
-            Path: /category/{id}
+            Path: /category/{id}/items
             Method: GET
 
 Outputs:
