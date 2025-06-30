@@ -8,7 +8,7 @@ def lambda_handler(event, context):
     except (KeyError, TypeError, ValueError):
         return {
             'statusCode': 400,
-            'body': json.dumps({'error': 'Invalid or missing id in path'})
+            'body': json.dumps({'error': 'Invalid or missing ID in path'})
         }
 
     # Database operation
@@ -33,7 +33,7 @@ def lambda_handler(event, context):
                 if not deleted:
                     return {
                         'statusCode': 404,
-                        'body': json.dumps({'error': 'Item not found'})
+                        'body': json.dumps({'error': f'Item not found at ID: {item_id}'})
                     }
 
         return {
