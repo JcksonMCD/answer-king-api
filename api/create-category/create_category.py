@@ -29,12 +29,12 @@ def lambda_handler(event, context):
                     """,
                     (name,))
                 
-                item_id, created_at = cursor.fetchone()
+                category_id, created_at = cursor.fetchone()
         
         return {
             'statusCode': 201,
             'body': json.dumps({
-                'id': item_id,
+                'id': category_id,
                 'name': name,
                 'created_at': created_at.isoformat()
             })
