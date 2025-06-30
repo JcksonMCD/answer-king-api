@@ -1,0 +1,47 @@
+import os
+import json
+import psycopg2
+
+def lambda_handler(event, context):
+    try:
+        body = json.loads(event['body'])
+        name = body['name']
+    except (KeyError, json.JSONDecodeError, ValueError) as e:
+        return {
+            'statusCode': 400,
+            'body': json.dumps({'error': 'Invalid request data'})
+        }
+
+    try:
+        with psycopg2.connect(
+            dbname=os.environ['DB_NAME'],
+            user=os.environ['DB_USER'],
+            password=os.environ['DB_PASS'],
+            host=os.environ['DB_HOST'],
+            port=os.environ['DB_PORT']
+        ) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(
+                    """
+                    INSERT INTO categories (name)
+                    VALUES (%s)
+                    RETURNING id, created_at
+                    """,
+                    (name,))
+                
+                category_id, created_at = cursor.fetchone()
+        
+        return {
+            'statusCode': 201,
+            'body': json.dumps({
+                'id': category_id,
+                'name': name,
+                'created_at': created_at.isoformat()
+            })
+        }
+        
+    except psycopg2.Error as e:
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': 'Database error'})
+        }
