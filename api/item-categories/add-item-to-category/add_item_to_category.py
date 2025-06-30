@@ -22,13 +22,54 @@ def lambda_handler(event, context):
             port=os.environ['DB_PORT']
         ) as conn:
             with conn.cursor() as cursor:
-                
+                # Check item exists and isnt deleted
                 cursor.execute(
                     """
-                    INSERT INTO item_categories (item_id, category_id)
-                    VALUES (%s, %s)
+                    SELECT id FROM items
+                    WHERE id = %s
                     """,
-                    (item_id, category_id))
+                    (item_id,))
+                
+                if not cursor.fetchone():
+                    return {
+                        'statusCode': 400,
+                        'body': json.dumps({
+                            'error' : f'No Active Item found at ID: {item_id}'
+                        })
+                    }
+                
+                # Check category exists and isnt deleted
+                cursor.execute(
+                    """
+                    SELECT id FROM categories
+                    WHERE id = %s
+                    AND deleted = false;
+                    """,
+                    (category_id,))
+                
+                if not cursor.fetchone():
+                    return {
+                        'statusCode': 400,
+                        'body': json.dumps({
+                            'error' : f'No Active Category found at ID: {category_id}'
+                        })
+                    }
+                
+                try:
+                    cursor.execute(
+                        """
+                        INSERT INTO item_categories (item_id, category_id)
+                        VALUES (%s, %s)
+                        """,
+                        (item_id, category_id))
+                
+                except psycopg2.errors.UniqueViolation:
+                    return {
+                        'statusCode': 400,
+                        'body': json.dumps({
+                            'error' : f'Item at ID {item_id} is already added to Category with ID {category_id}'
+                        })
+                    }
                         
         return {
             'statusCode': 201,
@@ -40,5 +81,6 @@ def lambda_handler(event, context):
     except psycopg2.Error as e:
         return {
             'statusCode': 500,
-            'body': json.dumps({'error': 'Database error'})
+            'body': json.dumps({'error': 'Database error', 'details' : str(e)})
         }
+
