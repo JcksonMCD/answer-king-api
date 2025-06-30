@@ -8,7 +8,7 @@ def lambda_handler(event, context):
     except (KeyError, TypeError, ValueError):
         return {
             'statusCode': 400,
-            'body': json.dumps({'error': 'Invalid or missing id in path'})
+            'body': json.dumps({'error': 'Invalid or missing ID in path'})
         }
 
     try:
