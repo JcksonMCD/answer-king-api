@@ -291,6 +291,33 @@ Resources:
             RequestParameters:
               - method.request.querystring.itemID:
                   Required: true
+  GetAllItemsByCategoryFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./api/item-categories/get-items-by-category/
+      Handler: get_items_by_category.lambda_handler
+      Runtime: python3.13
+      Timeout: 10
+      VpcConfig:
+        SecurityGroupIds:
+          - !ImportValue LambdaSecurityGroupID
+        SubnetIds:
+          - !ImportValue Subnet1ID
+          - !ImportValue Subnet2ID
+      Environment:
+        Variables:
+          DB_NAME: AnswerKingAPI
+          DB_USER: !Ref DBUser
+          DB_PASS: !Ref DBPass
+          DB_HOST: !ImportValue AnswerKingDBHost
+          DB_PORT: "5432"
+      Events:
+        AnswerKingApi:
+          Type: Api
+          Properties:
+            RestApiId: !Ref AnswerKingApiGateway
+            Path: /category/{id}
+            Method: GET
 
 Outputs:
   AnswerKingApiGateway:
