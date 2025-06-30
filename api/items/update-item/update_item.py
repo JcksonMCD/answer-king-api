@@ -35,7 +35,7 @@ def lambda_handler(event, context):
                     UPDATE items
                     SET name = %s, price = %s, description = %s
                     WHERE id = %s
-                    RETURNING *;
+                    RETURNING id, name, price, description;
                     """,
                     (name, price, description, item_id)
                 )
