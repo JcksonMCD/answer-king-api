@@ -21,7 +21,7 @@ Resources:
   CreateItemFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/create-item/
+      CodeUri: ./api/items/create-item/
       Handler: create_item.lambda_handler
       Runtime: python3.13
       Timeout: 10
@@ -48,7 +48,7 @@ Resources:
   DeleteItemFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/remove-item/
+      CodeUri: ./api/items/remove-item/
       Handler: remove_item.lambda_handler
       Runtime: python3.13
       Timeout: 10
@@ -75,7 +75,7 @@ Resources:
   GetAllItemsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/get-all-items/
+      CodeUri: ./api/items/get-all-items/
       Handler: get_all_items.lambda_handler
       Runtime: python3.13
       Timeout: 10
@@ -102,7 +102,7 @@ Resources:
   GetItemByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/get-item-by-id/
+      CodeUri: ./api/items/get-item-by-id/
       Handler: get_item_by_id.lambda_handler
       Runtime: python3.13
       Timeout: 10
@@ -129,7 +129,7 @@ Resources:
   UpdateItemByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/update-item/
+      CodeUri: ./api/items/update-item/
       Handler: update_item.lambda_handler
       Runtime: python3.13
       Timeout: 10
@@ -156,7 +156,7 @@ Resources:
   CreateCategoryFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/create-category/
+      CodeUri: ./api/categories/create-category/
       Handler: create_category.lambda_handler
       Runtime: python3.13
       Timeout: 10
@@ -183,7 +183,7 @@ Resources:
   GetAllCategoriesFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/get-all-categories/
+      CodeUri: ./api/categories/get-all-categories/
       Handler: get_all_categories.lambda_handler
       Runtime: python3.13
       Timeout: 10
@@ -210,7 +210,7 @@ Resources:
   DeleteCategoryByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/remove-category/
+      CodeUri: ./api/categories/remove-category/
       Handler: remove_category.lambda_handler
       Runtime: python3.13
       Timeout: 10
@@ -237,7 +237,7 @@ Resources:
   UpdateCategoryByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/update-category/
+      CodeUri: ./api/categories/update-category/
       Handler: update_category.lambda_handler
       Runtime: python3.13
       Timeout: 10
