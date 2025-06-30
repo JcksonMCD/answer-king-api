@@ -34,11 +34,11 @@ def lambda_handler(event, context):
                 if not deleted:
                     return {
                         'statusCode': 404,
-                        'body': json.dumps({'error': 'Item not found'})
+                        'body': json.dumps({'error': f"No Category found at ID: {category_id}"})
                     }
 
         return {
-            'statusCode': 200,
+            'statusCode': 204,
             'body': json.dumps({'deleted_category_id': deleted[0]})
         }
 

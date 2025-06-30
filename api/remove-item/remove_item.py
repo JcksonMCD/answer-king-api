@@ -37,7 +37,7 @@ def lambda_handler(event, context):
                     }
 
         return {
-            'statusCode': 200,
+            'statusCode': 204,
             'body': json.dumps({'deleted_id': deleted[0]})
         }
 
