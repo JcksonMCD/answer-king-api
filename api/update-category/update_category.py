@@ -19,6 +19,12 @@ def lambda_handler(event, context):
             'body': json.dumps({'error': 'Invalid or missing ID in path or request data'})
         }
     
+    if not name:
+        return {
+            'statusCode': 400,
+            'body': json.dumps({'error': 'Empty Name field not accepted'})
+        }
+    
     try:
         with psycopg2.connect(
             dbname=os.environ['DB_NAME'],
@@ -41,7 +47,7 @@ def lambda_handler(event, context):
                 if not row:
                     return {
                         'statusCode': 404,
-                        'body': json.dumps({'error': f'No active Category not found at ID: {category_id}'})
+                        'body': json.dumps({'error': f'No active Category found at ID: {category_id}'})
                     }
                 
                 colnames = [desc[0] for desc in cursor.description]
