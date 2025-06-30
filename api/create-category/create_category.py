@@ -25,11 +25,12 @@ def lambda_handler(event, context):
                     """
                     INSERT INTO categories (name)
                     VALUES (%s)
-                    RETURNING id, created_at
+                    RETURNING id, created_at;
                     """,
                     (name,))
                 
                 category_id, created_at = cursor.fetchone()
+                conn.commit()
         
         return {
             'statusCode': 201,

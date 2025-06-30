@@ -179,7 +179,7 @@ Resources:
           Properties:
             RestApiId: !Ref AnswerKingApiGateway
             Path: /category
-            Method: GET
+            Method: POST
   GetAllCategoriesFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -206,7 +206,7 @@ Resources:
           Properties:
             RestApiId: !Ref AnswerKingApiGateway
             Path: /category
-            Method: POST
+            Method: GET
 
 Outputs:
   AnswerKingApiGateway:
