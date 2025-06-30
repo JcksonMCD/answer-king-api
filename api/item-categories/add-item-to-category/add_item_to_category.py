@@ -2,6 +2,18 @@ import os
 import json
 import psycopg2
 
+def get_active_item(cursor, item_id):
+    cursor.execute(
+        "SELECT id FROM items WHERE id = %s AND deleted = false;", (item_id,)
+    )
+    return cursor.fetchone()
+
+def get_active_category(cursor, category_id):
+    cursor.execute(
+        "SELECT id FROM categories WHERE id = %s AND deleted = false;", (category_id,)
+    )
+    return cursor.fetchone()
+
 def lambda_handler(event, context):
     try:
         category_id = int(event['pathParameters']['id'])
@@ -22,15 +34,8 @@ def lambda_handler(event, context):
             port=os.environ['DB_PORT']
         ) as conn:
             with conn.cursor() as cursor:
-                # Check item exists and isnt deleted
-                cursor.execute(
-                    """
-                    SELECT id FROM items
-                    WHERE id = %s
-                    """,
-                    (item_id,))
                 
-                if not cursor.fetchone():
+                if not get_active_item(cursor, item_id):
                     return {
                         'statusCode': 400,
                         'body': json.dumps({
@@ -38,16 +43,7 @@ def lambda_handler(event, context):
                         })
                     }
                 
-                # Check category exists and isnt deleted
-                cursor.execute(
-                    """
-                    SELECT id FROM categories
-                    WHERE id = %s
-                    AND deleted = false;
-                    """,
-                    (category_id,))
-                
-                if not cursor.fetchone():
+                if not get_active_category(cursor, category_id):
                     return {
                         'statusCode': 400,
                         'body': json.dumps({
