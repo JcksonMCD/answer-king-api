@@ -34,7 +34,7 @@ def lambda_handler(event, context):
                     """
                     UPDATE items
                     SET name = %s, price = %s, description = %s
-                    WHERE id = %s
+                    WHERE id = %s AND deleted = FALSE
                     RETURNING id, name, price, description;
                     """,
                     (name, price, description, item_id)
@@ -43,7 +43,7 @@ def lambda_handler(event, context):
                 if not row:
                     return {
                         'statusCode': 404,
-                        'body': json.dumps({'error': f'Item not found at ID: {item_id}'})
+                        'body': json.dumps({'error': f'No Active Item found at ID: {item_id}'})
                     }
                 
                 colnames = [desc[0] for desc in cursor.description]
