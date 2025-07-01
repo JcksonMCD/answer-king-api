@@ -2,6 +2,7 @@ import datetime
 import os
 import json
 import psycopg2
+from db_connection import get_db_connection
 
 def json_default(obj):
     if isinstance(obj, (datetime.datetime, datetime.date)):
@@ -10,13 +11,7 @@ def json_default(obj):
 
 def lambda_handler(event, context):
     try:
-        with psycopg2.connect(
-            dbname=os.environ['DB_NAME'],
-            user=os.environ['DB_USER'],
-            password=os.environ['DB_PASS'],
-            host=os.environ['DB_HOST'],
-            port=os.environ['DB_PORT']
-        ) as conn:
+        with get_db_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
                     """

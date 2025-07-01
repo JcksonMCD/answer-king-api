@@ -18,11 +18,22 @@ Resources:
     Properties:
       Name: Answer King API
       StageName: Development
+  DBConnectionLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: db-connection-layer
+      Description: Shared DB connection code
+      ContentUri: api/lambda-layers/db-connection
+      CompatibleRuntimes:
+        - python3.13
+
   CreateItemFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./api/items/create-item/
       Handler: create_item.lambda_handler
+      Layers:
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -50,6 +61,8 @@ Resources:
     Properties:
       CodeUri: ./api/items/remove-item/
       Handler: remove_item.lambda_handler
+      Layers:
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -77,6 +90,8 @@ Resources:
     Properties:
       CodeUri: ./api/items/get-all-items/
       Handler: get_all_items.lambda_handler
+      Layers:
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -104,6 +119,8 @@ Resources:
     Properties:
       CodeUri: ./api/items/get-item-by-id/
       Handler: get_item_by_id.lambda_handler
+      Layers:
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -131,6 +148,8 @@ Resources:
     Properties:
       CodeUri: ./api/items/update-item/
       Handler: update_item.lambda_handler
+      Layers:
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -158,6 +177,8 @@ Resources:
     Properties:
       CodeUri: ./api/categories/create-category/
       Handler: create_category.lambda_handler
+      Layers:
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -185,6 +206,8 @@ Resources:
     Properties:
       CodeUri: ./api/categories/get-all-categories/
       Handler: get_all_categories.lambda_handler
+      Layers:
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -212,6 +235,8 @@ Resources:
     Properties:
       CodeUri: ./api/categories/remove-category/
       Handler: remove_category.lambda_handler
+      Layers:
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -239,6 +264,8 @@ Resources:
     Properties:
       CodeUri: ./api/categories/update-category/
       Handler: update_category.lambda_handler
+      Layers:
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -266,6 +293,8 @@ Resources:
     Properties:
       CodeUri: ./api/item-categories/add-item-to-category/
       Handler: add_item_to_category.lambda_handler
+      Layers:
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -296,6 +325,8 @@ Resources:
     Properties:
       CodeUri: ./api/item-categories/get-items-by-category/
       Handler: get_items_by_category.lambda_handler
+      Layers:
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -323,6 +354,8 @@ Resources:
     Properties:
       CodeUri: ./api/orders/create-order/
       Handler: create_order.lambda_handler
+      Layers:
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
