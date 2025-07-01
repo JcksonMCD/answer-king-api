@@ -11,7 +11,7 @@ def json_default(obj):
 
 def lambda_handler(event, context):
     try:
-        with get_db_connection as conn:
+        with get_db_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
                     """

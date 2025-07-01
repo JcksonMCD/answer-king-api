@@ -14,7 +14,7 @@ def lambda_handler(event, context):
 
     # Database operation
     try:
-        with get_db_connection as conn:
+        with get_db_connection() as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
                     """
