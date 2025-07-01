@@ -29,5 +29,5 @@ def lambda_handler(event, context):
     except psycopg2.Error as e:
         return {
             'statusCode': 500,
-            'body': json.dumps({'error': 'Database error'})
+            'body': json.dumps({'error': 'Database error', "message" : str(e)})
         }
