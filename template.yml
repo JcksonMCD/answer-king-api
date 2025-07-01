@@ -283,6 +283,8 @@ Resources:
     Properties:
       CodeUri: ./api/item-categories/add-item-to-category/
       Handler: add_item_to_category.lambda_handler
+      Layers:
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
