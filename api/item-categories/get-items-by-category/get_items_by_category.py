@@ -47,7 +47,7 @@ def lambda_handler(event, context):
                     SELECT items.id, items.name, items.price 
                     FROM item_categories
                     INNER JOIN items ON item_categories.item_id = items.id
-                    WHERE item_categories.category_id = %s;
+                    WHERE item_categories.category_id = %s AND items.deleted = FALSE;
                     """,
                     (category_id,))
                 
