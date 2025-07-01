@@ -117,6 +117,8 @@ Resources:
     Properties:
       CodeUri: ./api/items/get-item-by-id/
       Handler: get_item_by_id.lambda_handler
+      Layers:
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
