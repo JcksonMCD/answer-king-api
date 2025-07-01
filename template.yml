@@ -196,6 +196,8 @@ Resources:
     Properties:
       CodeUri: ./api/categories/get-all-categories/
       Handler: get_all_categories.lambda_handler
+      Layers:
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
