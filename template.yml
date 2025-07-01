@@ -32,6 +32,8 @@ Resources:
     Properties:
       CodeUri: ./api/items/create-item/
       Handler: create_item.lambda_handler
+      Layers:
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
