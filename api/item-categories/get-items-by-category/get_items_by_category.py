@@ -2,6 +2,7 @@ import os
 import json
 import psycopg2
 import decimal
+from db_connection import get_db_connection
 
 def decimal_default(obj):
     if isinstance(obj, decimal.Decimal):
@@ -25,13 +26,7 @@ def lambda_handler(event, context):
         }
 
     try:
-        with psycopg2.connect(
-            dbname=os.environ['DB_NAME'],
-            user=os.environ['DB_USER'],
-            password=os.environ['DB_PASS'],
-            host=os.environ['DB_HOST'],
-            port=os.environ['DB_PORT']
-        ) as conn:
+        with get_db_connection() as conn:
             with conn.cursor() as cursor:
                 
                 if not get_active_category(cursor, category_id):
