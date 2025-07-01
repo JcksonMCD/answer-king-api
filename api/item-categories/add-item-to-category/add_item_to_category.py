@@ -4,7 +4,7 @@ import psycopg2
 
 def get_active_item(cursor, item_id):
     cursor.execute(
-        "SELECT id FROM items WHERE id = %s;", (item_id,)
+        "SELECT id FROM items WHERE id = %s AND deleted = false;", (item_id,)
     )
     return cursor.fetchone()
 

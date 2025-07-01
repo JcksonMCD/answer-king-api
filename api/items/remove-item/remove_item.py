@@ -23,7 +23,8 @@ def lambda_handler(event, context):
             with conn.cursor() as cursor:
                 cursor.execute(
                     """
-                    DELETE FROM items
+                    UPDATE items
+                    SET deleted = TRUE
                     WHERE id = %s
                     RETURNING id;
                     """,

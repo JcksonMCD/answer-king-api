@@ -28,8 +28,9 @@ def lambda_handler(event, context):
             with conn.cursor() as cursor:
                 cursor.execute(
                     """
-                    SELECT * FROM items
-                    WHERE id = %s;
+                    SELECT id, name, price, description, created_at 
+                    FROM items
+                    WHERE id = %s AND deleted = FALSE;
                     """,
                     (item_id,)
                 )
@@ -37,7 +38,7 @@ def lambda_handler(event, context):
                 if not row:
                     return {
                         'statusCode': 404,
-                        'body': json.dumps({'error': f'Item not found at ID: {item_id}'})
+                        'body': json.dumps({'error': f'No active Item found at ID: {item_id}'})
                     }
                 
                 colnames = [desc[0] for desc in cursor.description]

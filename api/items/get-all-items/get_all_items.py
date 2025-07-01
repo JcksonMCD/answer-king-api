@@ -12,7 +12,7 @@ def lambda_handler(event, context):
             port=os.environ['DB_PORT']
         ) as conn:
             with conn.cursor() as cursor:
-                cursor.execute("SELECT * FROM items;")
+                cursor.execute("SELECT id, name, price, description FROM items WHERE deleted = FALSE;")
                 rows = cursor.fetchall()
                 items = []
                 for row in rows:
@@ -29,5 +29,5 @@ def lambda_handler(event, context):
     except psycopg2.Error as e:
         return {
             'statusCode': 500,
-            'body': json.dumps({'error': 'Database error'})
+            'body': json.dumps({'error': 'Database error', "message" : str(e)})
         }
