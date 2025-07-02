@@ -15,18 +15,50 @@ class TestGetAllCategories(unittest.TestCase):
         ]
 
     @patch("api.categories.get_all_categories.get_all_categories.get_db_connection")
-    def test_lambda_handler_returns_expected_categories(self, mock_get_db_connection):
-        # Mock Cursor
+    def test_lambda_handler_returns_expected_category(self, mock_get_db_connection):
         mock_cursor = MagicMock()
         mock_cursor.fetchall.return_value = self.mock_rows
         mock_cursor.description = self.mock_description
 
-        #Mock Connection
         mock_conn = MagicMock()
         mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
         mock_get_db_connection.return_value.__enter__.return_value = mock_conn
 
         expectedResponseBody = [{'id': 1, 'name': 'Test Category', 'created_at': '2025-07-02T12:00:00'}]
+
+        response = lambda_handler({},None)
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body']), expectedResponseBody)
+
+    @patch("api.categories.get_all_categories.get_all_categories.get_db_connection")
+    def test_lambda_handler_returns_expected_categories(self, mock_get_db_connection):
+        mock_cursor = MagicMock()
+        mock_cursor.fetchall.return_value = [(1, "Test Category", datetime.datetime(2025, 7, 2, 12, 0, 0)), (2, "Test Category 2", datetime.datetime(2025, 7, 2, 12, 0, 0))]
+        mock_cursor.description = self.mock_description
+
+        mock_conn = MagicMock()
+        mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
+        mock_get_db_connection.return_value.__enter__.return_value = mock_conn
+
+        expectedResponseBody = [{'id': 1, 'name': 'Test Category', 'created_at': '2025-07-02T12:00:00'}, {'id': 2, 'name': 'Test Category 2', 'created_at': '2025-07-02T12:00:00'}]
+
+        response = lambda_handler({},None)
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body']), expectedResponseBody)
+
+    @patch("api.categories.get_all_categories.get_all_categories.get_db_connection")
+    def test_lambda_handler_returns_empty_list_if_empty_input(self, mock_get_db_connection):
+        mock_cursor = MagicMock()
+        mock_cursor.fetchall.return_value = []
+        mock_cursor.description = []
+
+        mock_conn = MagicMock()
+        mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
+        mock_get_db_connection.return_value.__enter__.return_value = mock_conn
+
+        expectedResponseBody = []
 
         response = lambda_handler({},None)
 
