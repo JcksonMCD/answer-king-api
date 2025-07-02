@@ -7,9 +7,6 @@ import datetime
 
 class TestGetAllCategories(unittest.TestCase):
     def setUp(self):
-        self.mock_rows = [
-            (1, "Test Category", datetime.datetime(2025, 7, 2, 12, 0, 0))
-        ]
         self.mock_description = [
             ("id",), ("name",), ("created_at",)
         ]
@@ -17,7 +14,9 @@ class TestGetAllCategories(unittest.TestCase):
     @patch("api.categories.get_all_categories.get_all_categories.get_db_connection")
     def test_lambda_handler_returns_expected_category(self, mock_get_db_connection):
         mock_cursor = MagicMock()
-        mock_cursor.fetchall.return_value = self.mock_rows
+        mock_cursor.fetchall.return_value = [
+            (1, "Test Category", datetime.datetime(2025, 7, 2, 12, 0, 0))
+        ]
         mock_cursor.description = self.mock_description
 
         mock_conn = MagicMock()
