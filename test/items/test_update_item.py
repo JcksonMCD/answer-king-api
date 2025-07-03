@@ -51,14 +51,35 @@ class TestUpdateItem(unittest.TestCase):
         self.assertEqual(response['statusCode'], 400)
         self.assertEqual(body["error"], "Invalid or missing ID in path or request data")
 
-    def test_lambda_handler_update_item_throws_error_with_incorrect_body(self):
-        event = {'pathParameters' : {'id' : '1'}, 'body' : json.dumps({'nme' : 'Updated'})}
+    def test_lambda_handler_update_item_throws_error_with_missing_price(self):
+        event = {'pathParameters' : {'id' : '1'}, 'body' : json.dumps({'name' : 'Updated', 'description': 'Test Item Description'})}
 
         response = lambda_handler(event,None)
         body = json.loads(response['body'])
 
         self.assertEqual(response['statusCode'], 400)
         self.assertEqual(body["error"], "Invalid or missing ID in path or request data")
+
+    def test_lambda_handler_update_item_throws_error_with_missing_name(self):
+        event = {'pathParameters' : {'id' : '1'}, 'body' : json.dumps({'price' : 1.99, 'description': 'Test Item Description'})}
+
+        response = lambda_handler(event,None)
+        body = json.loads(response['body'])
+
+        self.assertEqual(response['statusCode'], 400)
+        self.assertEqual(body["error"], "Invalid or missing ID in path or request data")
+
+    @patch("api.items.update_item.update_item.get_db_connection")
+    def test_lambda_handler_updates_expected_item_with_missing_description(self, mock_get_db_connection):
+        self.setup_mock_db(mock_get_db_connection, fetchone=(1, "Updated Item", 1.99))
+
+        event = {'pathParameters' : {'id' : '1'}, 'body' : json.dumps({'name' : 'Updated Item', 'price': 1.99})}
+        expectedResponseBody = {'id': 1, 'name' : 'Updated Item', 'price': 1.99}
+
+        response = lambda_handler(event,None)
+
+        self.assertEqual(response['statusCode'], 200)
+        self.assertEqual(json.loads(response['body']), expectedResponseBody)
 
     def test_lambda_handler_update_item_throws_error_with_missing_body(self):
         event = {'pathParameters' : {'id' : '1'}}
