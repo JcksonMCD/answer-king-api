@@ -7,7 +7,9 @@ def lambda_handler(event, context):
     # Parse and validate request
     try:
         body = json.loads(event['body'])
-        name = body['name']
+        name = body.get('name')
+        if not name: 
+            raise KeyError('Name field missing')
         price = float(body['price'])  # Validate numeric type
         description = body.get('description')
     except (KeyError, json.JSONDecodeError, ValueError) as e:

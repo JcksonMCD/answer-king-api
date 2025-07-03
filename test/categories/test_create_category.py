@@ -43,16 +43,7 @@ class TestCreateCategory(unittest.TestCase):
         self.assertEqual(response['statusCode'], 400)
         self.assertEqual(body["error"], "Invalid request data")
 
-    def test_lambda_handler_create_category_throws_error_with_extra_body_params(self):
-        event = {'body' : json.dumps({'id': 1, 'name' : 'Created'})}
-
-        response = lambda_handler(event,None)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "Invalid request data")
-
-    def test_lambda_handler_create_category_throws_error_with_extra_body_params(self):
+    def test_lambda_handler_create_category_throws_error_with_body_as_string(self):
         event = {'body' : 'name : Created'}
 
         response = lambda_handler(event,None)
