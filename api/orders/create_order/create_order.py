@@ -1,4 +1,3 @@
-import os
 import json
 import psycopg2
 from db_connection import get_db_connection
@@ -16,8 +15,13 @@ def lambda_handler(event, context):
                     """,
                     )
                 
-                order_id, order_status, order_total, created_at = cursor.fetchone()
-                conn.commit()
+                result = cursor.fetchone()
+                if not result:
+                    return {
+                        'statusCode': 500,
+                        'body': json.dumps({'error': 'No data returned from DB'})
+                    }
+                order_id, order_status, order_total, created_at = result
         
         return {
             'statusCode': 201,

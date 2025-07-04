@@ -42,7 +42,7 @@ Resources:
       MasterUsername: !Ref DBUsername
       MasterUserPassword: !Ref DBPassword
       PubliclyAccessible: false
-      VPCSecurityGroups:
+      VPCSecurityGroupIds:
         - !Ref RDSSecurityGroup
       Tags:
         - Key: Name
