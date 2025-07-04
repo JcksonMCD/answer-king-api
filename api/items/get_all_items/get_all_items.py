@@ -13,7 +13,7 @@ def lambda_handler(event, context):
                 for row in rows:
                     item = {}
                     for i, column in enumerate(cursor.description):
-                        item[column.name] = str(row[i])
+                        item[column[0]] = str(row[i])
                     items.append(item)
 
         return {

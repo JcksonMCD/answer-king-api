@@ -3,6 +3,7 @@ import psycopg2
 from unittest.mock import MagicMock, patch
 import json
 from api.categories.get_all_categories.get_all_categories import lambda_handler, json_default
+from test.helper_funcs.setup_mock_db import setup_mock_db
 import datetime
 
 class TestGetAllCategories(unittest.TestCase):
@@ -13,15 +14,7 @@ class TestGetAllCategories(unittest.TestCase):
 
     @patch("api.categories.get_all_categories.get_all_categories.get_db_connection")
     def test_lambda_handler_returns_expected_category(self, mock_get_db_connection):
-        mock_cursor = MagicMock()
-        mock_cursor.fetchall.return_value = [
-            (1, "Test Category", datetime.datetime(2025, 7, 2, 12, 0, 0))
-        ]
-        mock_cursor.description = self.mock_description
-
-        mock_conn = MagicMock()
-        mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
-        mock_get_db_connection.return_value.__enter__.return_value = mock_conn
+        setup_mock_db(mock_get_db_connection, fetchall=[(1, "Test Category", datetime.datetime(2025, 7, 2, 12, 0, 0))], description=self.mock_description)
 
         expectedResponseBody = [{'id': 1, 'name': 'Test Category', 'created_at': '2025-07-02T12:00:00'}]
 
@@ -32,13 +25,7 @@ class TestGetAllCategories(unittest.TestCase):
 
     @patch("api.categories.get_all_categories.get_all_categories.get_db_connection")
     def test_lambda_handler_returns_expected_categories(self, mock_get_db_connection):
-        mock_cursor = MagicMock()
-        mock_cursor.fetchall.return_value = [(1, "Test Category", datetime.datetime(2025, 7, 2, 12, 0, 0)), (2, "Test Category 2", datetime.datetime(2025, 7, 2, 12, 0, 0))]
-        mock_cursor.description = self.mock_description
-
-        mock_conn = MagicMock()
-        mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
-        mock_get_db_connection.return_value.__enter__.return_value = mock_conn
+        setup_mock_db(mock_get_db_connection, fetchall=[(1, "Test Category", datetime.datetime(2025, 7, 2, 12, 0, 0)), (2, "Test Category 2", datetime.datetime(2025, 7, 2, 12, 0, 0))], description=self.mock_description)
 
         expectedResponseBody = [{'id': 1, 'name': 'Test Category', 'created_at': '2025-07-02T12:00:00'}, {'id': 2, 'name': 'Test Category 2', 'created_at': '2025-07-02T12:00:00'}]
 
@@ -48,14 +35,8 @@ class TestGetAllCategories(unittest.TestCase):
         self.assertEqual(json.loads(response['body']), expectedResponseBody)
 
     @patch("api.categories.get_all_categories.get_all_categories.get_db_connection")
-    def test_lambda_handler_returns_empty_list_if_empty_input(self, mock_get_db_connection):
-        mock_cursor = MagicMock()
-        mock_cursor.fetchall.return_value = []
-        mock_cursor.description = []
-
-        mock_conn = MagicMock()
-        mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
-        mock_get_db_connection.return_value.__enter__.return_value = mock_conn
+    def test_lambda_handler_returns_empty_list_if_empty_db_return(self, mock_get_db_connection):
+        setup_mock_db(mock_get_db_connection, fetchall=[], description=self.mock_description)
 
         expectedResponseBody = []
 
@@ -66,7 +47,7 @@ class TestGetAllCategories(unittest.TestCase):
 
     @patch("api.categories.get_all_categories.get_all_categories.get_db_connection")
     def test_lambda_handler_throws_database_error(self, mock_get_db_connection):
-        mock_get_db_connection.side_effect = psycopg2.Error('DB Error')
+        setup_mock_db(mock_get_db_connection, side_effect=psycopg2.Error)
 
         response = lambda_handler({},None)
 

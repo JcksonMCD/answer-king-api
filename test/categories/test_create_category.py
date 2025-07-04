@@ -1,8 +1,9 @@
 import unittest
 import psycopg2
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 import json
 from api.categories.create_category.create_category import lambda_handler
+from test.helper_funcs.setup_mock_db import setup_mock_db
 import datetime
 
 class TestCreateCategory(unittest.TestCase):
@@ -11,20 +12,11 @@ class TestCreateCategory(unittest.TestCase):
             ("id",), ("name",), ("created_at",)
         ]
 
-    def setup_mock_db(self, mock_get_db_connection, fetchone=None, side_effect=None):
-        mock_cursor = MagicMock()
-        mock_cursor.fetchone.return_value = fetchone
-        if side_effect:
-            mock_cursor.fetchone.side_effect = side_effect
-        mock_cursor.description = self.mock_description
-
-        mock_conn = MagicMock()
-        mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
-        mock_get_db_connection.return_value.__enter__.return_value = mock_conn
-
     @patch("api.categories.create_category.create_category.get_db_connection")
     def test_lambda_handler_creates_expected_category(self, mock_get_db_connection):
-        self.setup_mock_db(mock_get_db_connection, fetchone=(1, datetime.datetime(2025, 7, 2, 12, 0, 0)))
+        setup_mock_db(mock_get_db_connection, 
+                           fetchone=(1, datetime.datetime(2025, 7, 2, 12, 0, 0)),
+                           description=self.mock_description)
 
         event = {'body' : json.dumps({'name' : 'Created'})}
         expectedResponseBody = {'id': 1, 'name': 'Created', 'created_at': '2025-07-02T12:00:00'}
@@ -43,16 +35,7 @@ class TestCreateCategory(unittest.TestCase):
         self.assertEqual(response['statusCode'], 400)
         self.assertEqual(body["error"], "Invalid request data")
 
-    def test_lambda_handler_create_category_throws_error_with_extra_body_params(self):
-        event = {'body' : json.dumps({'id': 1, 'name' : 'Created'})}
-
-        response = lambda_handler(event,None)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "Invalid request data")
-
-    def test_lambda_handler_create_category_throws_error_with_extra_body_params(self):
+    def test_lambda_handler_create_category_throws_error_with_body_as_string(self):
         event = {'body' : 'name : Created'}
 
         response = lambda_handler(event,None)
@@ -70,7 +53,7 @@ class TestCreateCategory(unittest.TestCase):
 
     @patch("api.categories.create_category.create_category.get_db_connection")
     def test_lambda_handler_create_category_throws_error_when_db_has_error(self, mock_get_db_connection):
-        self.setup_mock_db(mock_get_db_connection, side_effect=psycopg2.Error)
+        setup_mock_db(mock_get_db_connection, side_effect=psycopg2.Error)
 
         event = {'body' : json.dumps({'name' : 'Created'})}
 

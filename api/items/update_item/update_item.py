@@ -14,6 +14,8 @@ def lambda_handler(event, context):
         item_id = int(event['pathParameters']['id'])
         body = json.loads(event['body'])
         name = body['name']
+        if not name:
+            assert TypeError
         price = float(body['price'])
         description = body.get('description')
     except (KeyError, TypeError, ValueError):

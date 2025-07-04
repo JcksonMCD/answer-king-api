@@ -1,29 +1,29 @@
 import unittest
 import psycopg2
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 import json
-from api.categories.remove_category.remove_category import lambda_handler
+from api.items.remove_item.remove_item import lambda_handler
 from test.helper_funcs.setup_mock_db import setup_mock_db
 
-class TestRemoveCategory(unittest.TestCase):
+class TestRemoveItem(unittest.TestCase):
     def setUp(self):
         self.mock_description = [
-            ("id",), ("name",), ("created_at",)
+            ("id",), ("name",), ("price",), ("description",), ("created_at",)
         ]
 
-    @patch("api.categories.remove_category.remove_category.get_db_connection")
-    def test_lambda_handler_removes_expected_category(self, mock_get_db_connection):
-        setup_mock_db(mock_get_db_connection, fetchone=(1,),description=self.mock_description)
+    @patch("api.items.remove_item.remove_item.get_db_connection")
+    def test_lambda_handler_removes_expected_item(self, mock_get_db_connection):
+        setup_mock_db(mock_get_db_connection, fetchone=(1,), description=self.mock_description)
 
         event = {'pathParameters' : {'id' : '1'}}
-        expectedResponseBody = {'deleted_category_id': 1}
+        expectedResponseBody = {'deleted_id': 1}
 
         response = lambda_handler(event,None)
 
         self.assertEqual(response['statusCode'], 204)
         self.assertEqual(json.loads(response['body']), expectedResponseBody)
 
-    @patch("api.categories.remove_category.remove_category.get_db_connection")
+    @patch("api.items.remove_item.remove_item.get_db_connection")
     def test_lambda_handler_throws_error_when_db_errors(self, mock_get_db_connection):
         setup_mock_db(mock_get_db_connection, side_effect=psycopg2.Error)
 
@@ -35,19 +35,19 @@ class TestRemoveCategory(unittest.TestCase):
         self.assertEqual(response['statusCode'], 500)
         self.assertEqual(json.loads(response['body']), expectedResponseBody)
 
-    @patch("api.categories.remove_category.remove_category.get_db_connection")
+    @patch("api.items.remove_item.remove_item.get_db_connection")
     def test_lambda_handler_throws_error_when_db_returns_nothing(self, mock_get_db_connection):
         setup_mock_db(mock_get_db_connection, fetchone=())
 
         event = {'pathParameters' : {'id' : '1'}}
-        expectedResponseBody = {'error': 'No Category found at ID: 1'}
+        expectedResponseBody = {'error': 'Item not found at ID: 1'}
 
         response = lambda_handler(event,None)
 
         self.assertEqual(response['statusCode'], 404)
         self.assertEqual(json.loads(response['body']), expectedResponseBody)
 
-    def test_lambda_handler_remove_category_throws_error_with_incorrect_path(self):
+    def test_lambda_handler_remove_item_throws_error_with_incorrect_path(self):
         event = {'pathParameters' : {'id' : ''}}
 
         response = lambda_handler(event,None)
@@ -56,8 +56,8 @@ class TestRemoveCategory(unittest.TestCase):
         self.assertEqual(response['statusCode'], 400)
         self.assertEqual(body["error"], "Invalid or missing ID in path")
 
-    def test_lambda_handler_remove_category_throws_error_with_non_numerical_path(self):
-        event = {'pathParameters' : {'id' : 'c'}}
+    def test_lambda_handler_remove_item_throws_error_with_non_numerical_path(self):
+        event = {'pathParameters' : {'id' : 'id'}}
 
         response = lambda_handler(event,None)
         body = json.loads(response['body'])
@@ -65,7 +65,7 @@ class TestRemoveCategory(unittest.TestCase):
         self.assertEqual(response['statusCode'], 400)
         self.assertEqual(body["error"], "Invalid or missing ID in path")
 
-    def test_lambda_handler_remove_category_throws_error_with_missing_path(self):
+    def test_lambda_handler_remove_item_throws_error_with_missing_path(self):
         response = lambda_handler({},None)
         body = json.loads(response['body'])
 

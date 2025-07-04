@@ -3,6 +3,7 @@ import psycopg2
 from unittest.mock import MagicMock, patch
 import json
 from api.categories.update_category.update_category import lambda_handler, json_default
+from test.helper_funcs.setup_mock_db import setup_mock_db
 import datetime
 
 class TestUpdateCategory(unittest.TestCase):
@@ -11,20 +12,9 @@ class TestUpdateCategory(unittest.TestCase):
             ("id",), ("name",), ("created_at",)
         ]
 
-    def setup_mock_db(self, mock_get_db_connection, fetchone=None, side_effect=None):
-        mock_cursor = MagicMock()
-        mock_cursor.fetchone.return_value = fetchone
-        if side_effect:
-            mock_cursor.fetchone.side_effect = side_effect
-        mock_cursor.description = self.mock_description
-
-        mock_conn = MagicMock()
-        mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
-        mock_get_db_connection.return_value.__enter__.return_value = mock_conn
-
     @patch("api.categories.update_category.update_category.get_db_connection")
     def test_lambda_handler_updates_expected_category(self, mock_get_db_connection):
-        self.setup_mock_db(mock_get_db_connection, fetchone=(1, "Updated"))
+        setup_mock_db(mock_get_db_connection, fetchone=(1, "Updated"), description=self.mock_description)
 
         event = {'pathParameters' : {'id' : '1'}, 'body' : json.dumps({'name' : 'Updated'})}
         expectedResponseBody = {'id': 1, 'name': 'Updated'}
@@ -72,7 +62,7 @@ class TestUpdateCategory(unittest.TestCase):
 
     @patch("api.categories.update_category.update_category.get_db_connection")
     def test_lambda_handler_update_category_throws_error_if_row_not_returned(self, mock_get_db_connection):
-        self.setup_mock_db(mock_get_db_connection, fetchone=())
+        setup_mock_db(mock_get_db_connection, fetchone=())
 
         event = {'pathParameters' : {'id' : '1'}, 'body' : json.dumps({'name' : 'Updated'})}
         
@@ -84,7 +74,7 @@ class TestUpdateCategory(unittest.TestCase):
 
     @patch("api.categories.update_category.update_category.get_db_connection")
     def test_lambda_handler_update_category_throws_error_when_db_has_error(self, mock_get_db_connection):
-        self.setup_mock_db(mock_get_db_connection, side_effect=psycopg2.Error)
+        setup_mock_db(mock_get_db_connection, side_effect=psycopg2.Error)
 
         event = {'pathParameters' : {'id' : '1'}, 'body' : json.dumps({'name' : 'Updated'})}
 
