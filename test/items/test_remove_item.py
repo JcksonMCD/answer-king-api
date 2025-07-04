@@ -1,29 +1,19 @@
 import unittest
 import psycopg2
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 import json
 from api.items.remove_item.remove_item import lambda_handler
+from test.helper_funcs.setup_mock_db import setup_mock_db
 
 class TestRemoveItem(unittest.TestCase):
     def setUp(self):
         self.mock_description = [
             ("id",), ("name",), ("price",), ("description",), ("created_at",)
         ]
-        
-    def setup_mock_db(self, mock_get_db_connection, fetchone=None, side_effect=None):
-        mock_cursor = MagicMock()
-        mock_cursor.fetchone.return_value = fetchone
-        if side_effect:
-            mock_cursor.fetchone.side_effect = side_effect
-        mock_cursor.description = self.mock_description
-
-        mock_conn = MagicMock()
-        mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
-        mock_get_db_connection.return_value.__enter__.return_value = mock_conn
 
     @patch("api.items.remove_item.remove_item.get_db_connection")
     def test_lambda_handler_removes_expected_item(self, mock_get_db_connection):
-        self.setup_mock_db(mock_get_db_connection, fetchone=(1,))
+        setup_mock_db(mock_get_db_connection, fetchone=(1,), description=self.mock_description)
 
         event = {'pathParameters' : {'id' : '1'}}
         expectedResponseBody = {'deleted_id': 1}
@@ -35,7 +25,7 @@ class TestRemoveItem(unittest.TestCase):
 
     @patch("api.items.remove_item.remove_item.get_db_connection")
     def test_lambda_handler_throws_error_when_db_errors(self, mock_get_db_connection):
-        self.setup_mock_db(mock_get_db_connection, side_effect=psycopg2.Error)
+        setup_mock_db(mock_get_db_connection, side_effect=psycopg2.Error)
 
         event = {'pathParameters' : {'id' : '1'}}
         expectedResponseBody = {'error': 'Database error'}
@@ -47,7 +37,7 @@ class TestRemoveItem(unittest.TestCase):
 
     @patch("api.items.remove_item.remove_item.get_db_connection")
     def test_lambda_handler_throws_error_when_db_returns_nothing(self, mock_get_db_connection):
-        self.setup_mock_db(mock_get_db_connection, fetchone=())
+        setup_mock_db(mock_get_db_connection, fetchone=())
 
         event = {'pathParameters' : {'id' : '1'}}
         expectedResponseBody = {'error': 'Item not found at ID: 1'}

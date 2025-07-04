@@ -1,8 +1,9 @@
 import unittest
 import psycopg2
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 import json
 from api.orders.create_order.create_order import lambda_handler
+from test.helper_funcs.setup_mock_db import setup_mock_db
 import datetime
 
 class TestCreateOrder(unittest.TestCase):
@@ -11,20 +12,9 @@ class TestCreateOrder(unittest.TestCase):
             ("id",), ("status",), ("total",), ("created_at",)
         ]
 
-    def setup_mock_db(self, mock_get_db_connection, fetchone=None, side_effect=None):
-        mock_cursor = MagicMock()
-        mock_cursor.fetchone.return_value = fetchone
-        if side_effect:
-            mock_cursor.fetchone.side_effect = side_effect
-        mock_cursor.description = self.mock_description
-
-        mock_conn = MagicMock()
-        mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
-        mock_get_db_connection.return_value.__enter__.return_value = mock_conn
-
     @patch("api.orders.create_order.create_order.get_db_connection")
     def test_lambda_handler_creates_expected_order(self, mock_get_db_connection):
-        self.setup_mock_db(mock_get_db_connection, fetchone=(1, 'pending', 0, datetime.datetime(2025, 7, 2, 12, 0, 0)))
+        setup_mock_db(mock_get_db_connection, fetchone=(1, 'pending', 0, datetime.datetime(2025, 7, 2, 12, 0, 0)), description=self.mock_description)
 
         expectedResponseBody = {'id' : 1, 'status' : 'pending', 'total': '0', 'created_at': '2025-07-02T12:00:00'}
 
@@ -35,7 +25,7 @@ class TestCreateOrder(unittest.TestCase):
 
     @patch("api.orders.create_order.create_order.get_db_connection")
     def test_lambda_handler_creates_expected_order_and_ignores_any_event_body(self, mock_get_db_connection):
-        self.setup_mock_db(mock_get_db_connection, fetchone=(1, 'pending', 0, datetime.datetime(2025, 7, 2, 12, 0, 0)))
+        setup_mock_db(mock_get_db_connection, fetchone=(1, 'pending', 0, datetime.datetime(2025, 7, 2, 12, 0, 0)), description=self.mock_description)
 
         event = {'body' : json.dumps({'total': 10})}
         expectedResponseBody = {'id' : 1, 'status' : 'pending', 'total': '0', 'created_at': '2025-07-02T12:00:00'}
@@ -47,7 +37,7 @@ class TestCreateOrder(unittest.TestCase):
 
     @patch("api.orders.create_order.create_order.get_db_connection")
     def test_lambda_handler_create_order_throws_error_when_db_has_error(self, mock_get_db_connection):
-        self.setup_mock_db(mock_get_db_connection, side_effect=psycopg2.Error)
+        setup_mock_db(mock_get_db_connection, fetchone=(), side_effect=psycopg2.Error)
 
         response = lambda_handler({},None)
         body = json.loads(response['body'])
@@ -57,7 +47,7 @@ class TestCreateOrder(unittest.TestCase):
 
     @patch("api.orders.create_order.create_order.get_db_connection")
     def test_lambda_handler_handles_db_returning_none(self, mock_get_db_connection):
-        self.setup_mock_db(mock_get_db_connection, fetchone=None)
+        setup_mock_db(mock_get_db_connection, fetchone=None)
 
         response = lambda_handler({}, None)
 

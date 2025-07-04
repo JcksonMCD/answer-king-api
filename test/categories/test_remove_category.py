@@ -3,6 +3,7 @@ import psycopg2
 from unittest.mock import MagicMock, patch
 import json
 from api.categories.remove_category.remove_category import lambda_handler
+from test.helper_funcs.setup_mock_db import setup_mock_db
 
 class TestRemoveCategory(unittest.TestCase):
     def setUp(self):
@@ -10,20 +11,9 @@ class TestRemoveCategory(unittest.TestCase):
             ("id",), ("name",), ("created_at",)
         ]
 
-    def setup_mock_db(self, mock_get_db_connection, fetchone=None, side_effect=None):
-        mock_cursor = MagicMock()
-        mock_cursor.fetchone.return_value = fetchone
-        if side_effect:
-            mock_cursor.fetchone.side_effect = side_effect
-        mock_cursor.description = self.mock_description
-
-        mock_conn = MagicMock()
-        mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
-        mock_get_db_connection.return_value.__enter__.return_value = mock_conn
-
     @patch("api.categories.remove_category.remove_category.get_db_connection")
     def test_lambda_handler_removes_expected_category(self, mock_get_db_connection):
-        self.setup_mock_db(mock_get_db_connection, fetchone=(1,))
+        setup_mock_db(mock_get_db_connection, fetchone=(1,),description=self.mock_description)
 
         event = {'pathParameters' : {'id' : '1'}}
         expectedResponseBody = {'deleted_category_id': 1}
@@ -35,7 +25,7 @@ class TestRemoveCategory(unittest.TestCase):
 
     @patch("api.categories.remove_category.remove_category.get_db_connection")
     def test_lambda_handler_throws_error_when_db_errors(self, mock_get_db_connection):
-        self.setup_mock_db(mock_get_db_connection, side_effect=psycopg2.Error)
+        setup_mock_db(mock_get_db_connection, side_effect=psycopg2.Error)
 
         event = {'pathParameters' : {'id' : '1'}}
         expectedResponseBody = {'error': 'Database error'}
@@ -47,7 +37,7 @@ class TestRemoveCategory(unittest.TestCase):
 
     @patch("api.categories.remove_category.remove_category.get_db_connection")
     def test_lambda_handler_throws_error_when_db_returns_nothing(self, mock_get_db_connection):
-        self.setup_mock_db(mock_get_db_connection, fetchone=())
+        setup_mock_db(mock_get_db_connection, fetchone=())
 
         event = {'pathParameters' : {'id' : '1'}}
         expectedResponseBody = {'error': 'No Category found at ID: 1'}

@@ -3,6 +3,7 @@ import psycopg2
 from unittest.mock import MagicMock, patch
 import json
 from api.items.get_all_items.get_all_items import lambda_handler
+from test.helper_funcs.setup_mock_db import setup_mock_db
 import datetime
 
 class TestGetAllItems(unittest.TestCase):
@@ -11,24 +12,13 @@ class TestGetAllItems(unittest.TestCase):
             ("id",), ("name",), ("price",), ("description",), ("created_at",)
         ]
 
-    def setup_mock_db(self, mock_get_db_connection, fetchall=None, side_effect=None):
-        mock_cursor = MagicMock()
-        mock_cursor.fetchall.return_value = fetchall
-        if side_effect:
-            mock_cursor.fetchall.side_effect = side_effect
-        mock_cursor.description = self.mock_description
-
-        mock_conn = MagicMock()
-        mock_conn.cursor.return_value.__enter__.return_value = mock_cursor
-        mock_get_db_connection.return_value.__enter__.return_value = mock_conn
-
     @patch("api.items.get_all_items.get_all_items.get_db_connection")
-    def test_lambda_handler_returns_expected_items(self, mock_get_db_connection):
-        self.setup_mock_db(mock_get_db_connection, fetchall=[
+    def test_lambda_handler_returns_expected_item(self, mock_get_db_connection):
+        setup_mock_db(mock_get_db_connection, fetchall=[
             (1, "Test Item", 1.99, "Test Item Description", datetime.datetime(2025, 7, 2, 12, 0, 0))
-        ])
+        ], description=self.mock_description)
 
-        expectedResponseBody = [{'id': 1, 'name': 'Test Item', 'price': '1.99', 'created_at': '2025-07-02T12:00:00'}]
+        expectedResponseBody = [{'id': '1', 'name': 'Test Item', 'price': '1.99', 'description': 'Test Item Description', 'created_at': '2025-07-02 12:00:00'}]
 
         response = lambda_handler({},None)
 
@@ -37,7 +27,7 @@ class TestGetAllItems(unittest.TestCase):
 
     @patch("api.items.get_all_items.get_all_items.get_db_connection")
     def test_lambda_handler_returns_expected_items(self, mock_get_db_connection):
-        self.setup_mock_db(mock_get_db_connection, fetchall=[(1, "Test Item", 1.99, "Test Item Description", datetime.datetime(2025, 7, 2, 12, 0, 0)),(2, "Test Item 2", 2.99, "Test Item 2 Description", datetime.datetime(2025, 7, 2, 12, 0, 0))])
+        setup_mock_db(mock_get_db_connection, fetchall=[(1, "Test Item", 1.99, "Test Item Description", datetime.datetime(2025, 7, 2, 12, 0, 0)),(2, "Test Item 2", 2.99, "Test Item 2 Description", datetime.datetime(2025, 7, 2, 12, 0, 0))],description=self.mock_description)
 
         expectedResponseBody = [{'id': '1', 'name': 'Test Item', 'price': '1.99', 'description': 'Test Item Description', 'created_at': '2025-07-02 12:00:00'}, {'id': '2', 'name': 'Test Item 2', 'description': 'Test Item 2 Description', 'price': '2.99', 'created_at': '2025-07-02 12:00:00'}]
 
@@ -48,7 +38,7 @@ class TestGetAllItems(unittest.TestCase):
 
     @patch("api.items.get_all_items.get_all_items.get_db_connection")
     def test_lambda_handler_returns_empty_list_if_empty_db_return(self, mock_get_db_connection):
-        self.setup_mock_db(mock_get_db_connection, fetchall={})
+        setup_mock_db(mock_get_db_connection, fetchall={}, description=self.mock_description)
 
         expectedResponseBody = []
 
@@ -59,7 +49,7 @@ class TestGetAllItems(unittest.TestCase):
 
     @patch("api.items.get_all_items.get_all_items.get_db_connection")
     def test_lambda_handler_throws_database_error(self, mock_get_db_connection):
-        mock_get_db_connection.side_effect = psycopg2.Error('DB Error')
+        setup_mock_db(mock_get_db_connection, side_effect = psycopg2.Error('DB Error'))
 
         response = lambda_handler({},None)
 
