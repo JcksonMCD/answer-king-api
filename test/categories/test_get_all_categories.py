@@ -52,4 +52,4 @@ class TestGetAllCategories(unittest.TestCase):
         response = lambda_handler({},None)
 
         self.assertEqual(response['statusCode'], 500)
-        self.assertIn('Database error', response['body'])
+        self.assertEqual(response['body'], {'error': 'Database error occured'})
