@@ -159,4 +159,4 @@ class TestUpdateItem(unittest.TestCase):
         body = json.loads(response['body'])
 
         self.assertEqual(response['statusCode'], 500)
-        self.assertEqual(body["error"], "Internal server error")
+        self.assertEqual(body["error"], "Internal server error ")

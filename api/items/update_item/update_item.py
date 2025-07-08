@@ -2,6 +2,8 @@ import logging
 import json
 import psycopg2
 from db_connection import get_db_connection
+from validate_items_request_body import validate_event_body
+from json_default import json_default
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -25,67 +27,6 @@ def extract_item_id(event):
             'statusCode': 400,
             'body': json.dumps({'error': 'ID must be an integer'})
         }
-
-def validate_event_body(event):
-    if not event.get('body'):
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Request body is required'})
-        }
-    
-    try:
-        body = json.loads(event['body'])
-    except json.JSONDecodeError as e:
-        logger.warning(f"Invalid JSON in request body: {e}")
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Invalid JSON format'})
-        }
-    
-    name = body.get('name')
-    if not name or not isinstance(name, str): 
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Name field is required and must be of type string'})
-        }
-    
-    name = name.strip()
-    if not name:
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Name field must not be empty'})
-        }
-    
-    price_raw = body.get('price')
-    if price_raw is None:
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Price is required'})
-        }
-    
-    try:
-        price = float(price_raw)
-        if price != round(price, 2):
-            return {
-                'statusCode': 400,
-                'body': json.dumps({'error': 'Price has to be to two decimal points'})
-            }
-
-        if price < 0:
-            return {
-                'statusCode': 400,
-                'body': json.dumps({'error': 'Price cannot be negative'})
-            }
-        
-    except (ValueError, TypeError) as e:
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Price must be a valid number'})
-        }
-    
-    description = body.get('description')
-
-    return name, price, description
 
 def update_item_in_db(item_id, name, price, description):
     try:
@@ -123,7 +64,7 @@ def update_item_in_db(item_id, name, price, description):
         logger.error(f"Unexpected error while updating item: {e}")
         return {
             'statusCode': 500,
-            'body': json.dumps({'error': 'Internal server error'})
+            'body': json.dumps({'error': f'Internal server error {e}'})
         }
     
 def lambda_handler(event, context):
@@ -134,11 +75,11 @@ def lambda_handler(event, context):
 
         item_id = item_id_response
 
-        body_validation_result = validate_event_body(event)
-        if isinstance(body_validation_result, dict) and 'statusCode' in body_validation_result:
-            return body_validation_result
-
-        name, price, description = body_validation_result
+        validation_result = validate_event_body(event, logger)
+        if isinstance(validation_result, dict) and 'statusCode' in validation_result:
+            return validation_result
+        
+        name, price, description = validation_result
 
         update_item_response = update_item_in_db(item_id, name, price, description)
         if isinstance(update_item_response, dict) and 'statusCode' in update_item_response:
@@ -146,12 +87,12 @@ def lambda_handler(event, context):
 
         return {
             'statusCode': 200,
-            'body': json.dumps(update_item_response)
+            'body': json.dumps(update_item_response, default=json_default)
         }
         
     except Exception as e:
         logger.error(f'Unhandled exception in lambda_handler: {e}', exc_info=True)
         return {
             'statusCode': 500,
-            'body': json.dumps({'error': 'Internal server error'})
+            'body': json.dumps({'error': f'Internal server error {e}'})
         }

@@ -34,6 +34,14 @@ Resources:
       ContentUri: api/lambda_layers/json_default_parser
       CompatibleRuntimes:
         - python3.13
+  ValidateItemsRequestBodyLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: validate-items-request-body-layer
+      Description: Validates items request body is accepted
+      ContentUri: api/lambda_layers/validate_items_request_body
+      CompatibleRuntimes:
+        - python3.13
 
   CreateItemFunction:
     Type: AWS::Serverless::Function
@@ -42,6 +50,7 @@ Resources:
       Handler: create_item.lambda_handler
       Layers:
         - !Ref DBConnectionLayer
+        - !Ref ValidateItemsRequestBodyLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -160,6 +169,8 @@ Resources:
       Handler: update_item.lambda_handler
       Layers:
         - !Ref DBConnectionLayer
+        - !Ref ValidateItemsRequestBodyLayer
+        - !Ref JsonDefaultLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
