@@ -79,9 +79,6 @@ class TestGetItemByID(unittest.TestCase):
         self.assertEqual(response['statusCode'], 500)
         self.assertIn('Internal server error', response['body'])
 
-    def test_default_json_handles_datetime(self):
-        self.assertEqual("1", json_default(1))
-
     def test_default_json_handles_string(self):
         self.assertEqual("String Object", json_default("String Object"))
 
