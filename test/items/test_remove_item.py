@@ -36,6 +36,18 @@ class TestRemoveItem(unittest.TestCase):
         self.assertEqual(json.loads(response['body']), expectedResponseBody)
 
     @patch("api.items.remove_item.remove_item.get_db_connection")
+    def test_lambda_handler_throws_error_when_db_throws_exception(self, mock_get_db_connection):
+        setup_mock_db(mock_get_db_connection, side_effect=Exception)
+
+        event = {'pathParameters' : {'id' : '1'}}
+        expectedResponseBody = {'error': 'Internal server error'}
+
+        response = lambda_handler(event,None)
+
+        self.assertEqual(response['statusCode'], 500)
+        self.assertEqual(json.loads(response['body']), expectedResponseBody)
+
+    @patch("api.items.remove_item.remove_item.get_db_connection")
     def test_lambda_handler_throws_error_when_db_returns_nothing(self, mock_get_db_connection):
         setup_mock_db(mock_get_db_connection, fetchone=())
 
@@ -63,7 +75,7 @@ class TestRemoveItem(unittest.TestCase):
         body = json.loads(response['body'])
 
         self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "Invalid or missing ID in path")
+        self.assertEqual(body["error"], "ID must be an integer")
 
     def test_lambda_handler_remove_item_throws_error_with_missing_path(self):
         response = lambda_handler({},None)

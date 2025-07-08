@@ -62,8 +62,8 @@ def lambda_handler(event, context):
         }
         
     except Exception as e:
-        logger.error(f"Unexpected error in lambda handler: {e}")
+        logger.error(f'Unhandled exception in lambda_handler: {e}', exc_info=True)
         return {
             'statusCode': 500,
-            'body': {'error': 'Internal server error'}
+            'body': {'error': 'Internal server'}
         }
