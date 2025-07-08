@@ -2,12 +2,15 @@ import logging
 import json
 import psycopg2
 import decimal
+import datetime
 from db_connection import get_db_connection
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
-def decimal_default(obj):
+def json_default(obj):
+    if isinstance(obj, (datetime.datetime, datetime.date)):
+        return obj.isoformat()
     if isinstance(obj, decimal.Decimal):
         return float(obj)
     return str(obj)  
@@ -87,7 +90,7 @@ def lambda_handler(event, context):
         logger.info(f'Successfully processed request for item ID: {item_id}')
         return {
             'statusCode': 200,
-            'body': json.dumps(db_result, default=decimal_default)
+            'body': json.dumps(db_result, default=json_default)
         }
         
     except Exception as e:
