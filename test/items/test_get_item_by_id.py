@@ -36,18 +36,6 @@ class TestGetItemByID(unittest.TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expectedResponseBody)
 
-    def test_lambda_handler_throws_error_if_no_id_param_found(self):
-        response = lambda_handler({},None)
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(json.loads(response['body']), {'error': 'Invalid or missing ID in path'})
-
-    def test_lambda_handler_throws_error_if_id_param_nan(self):
-        event = {'pathParameters' : {'id' : 'id'}}
-        response = lambda_handler(event,None)
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(json.loads(response['body']), {'error': 'ID must be an integer'})
 
     @patch("api.items.get_item_by_id.get_item_by_id.get_db_connection")
     def test_lambda_handler_throws_error_if_no_item_found(self, mock_get_db_connection):

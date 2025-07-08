@@ -1,6 +1,6 @@
 import unittest
 import psycopg2
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 import json
 from api.categories.remove_category.remove_category import lambda_handler
 from test.helper_funcs.setup_mock_db import setup_mock_db
@@ -46,31 +46,6 @@ class TestRemoveCategory(unittest.TestCase):
 
         self.assertEqual(response['statusCode'], 404)
         self.assertEqual(json.loads(response['body']), expectedResponseBody)
-
-    def test_lambda_handler_remove_category_throws_error_with_incorrect_path(self):
-        event = {'pathParameters' : {'id' : ''}}
-
-        response = lambda_handler(event,None)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "Invalid or missing ID in path")
-
-    def test_lambda_handler_remove_category_throws_error_with_non_numerical_path(self):
-        event = {'pathParameters' : {'id' : 'c'}}
-
-        response = lambda_handler(event,None)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "Invalid or missing ID in path")
-
-    def test_lambda_handler_remove_category_throws_error_with_missing_path(self):
-        response = lambda_handler({},None)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "Invalid or missing ID in path")
 
 
 

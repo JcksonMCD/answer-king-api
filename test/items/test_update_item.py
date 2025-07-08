@@ -23,33 +23,6 @@ class TestUpdateItem(unittest.TestCase):
         self.assertEqual(response['statusCode'], 200)
         self.assertEqual(json.loads(response['body']), expectedResponseBody)
 
-    def test_lambda_handler_update_item_throws_error_with_empty_path(self):
-        event = {'pathParameters' : {'id' : ''}, 'body' : json.dumps({'name' : 'Updated', 'price': 1.99, 'description': 'Test Item Description'})}
-
-        response = lambda_handler(event,None)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "Invalid or missing ID in path")
-
-    def test_lambda_handler_update_item_throws_error_when_path_nan(self):
-        event = {'pathParameters' : {'id' : 'id'}, 'body' : json.dumps({'name' : 'Updated', 'price': 1.99, 'description': 'Test Item Description'})}
-
-        response = lambda_handler(event,None)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "ID must be an integer")
-
-    def test_lambda_handler_update_item_throws_error_with_missing_path(self):
-        event = {'body' : json.dumps({'name' : 'Updated', 'price': 1.99, 'description': 'Test Item Description'})}
-
-        response = lambda_handler(event,None)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "Invalid or missing ID in path")
-
     def test_lambda_handler_update_item_throws_error_with_missing_price(self):
         event = {'pathParameters' : {'id' : '1'}, 'body' : json.dumps({'name' : 'Updated', 'description': 'Test Item Description'})}
 

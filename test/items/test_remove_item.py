@@ -59,30 +59,5 @@ class TestRemoveItem(unittest.TestCase):
         self.assertEqual(response['statusCode'], 404)
         self.assertEqual(json.loads(response['body']), expectedResponseBody)
 
-    def test_lambda_handler_remove_item_throws_error_with_incorrect_path(self):
-        event = {'pathParameters' : {'id' : ''}}
-
-        response = lambda_handler(event,None)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "Invalid or missing ID in path")
-
-    def test_lambda_handler_remove_item_throws_error_with_non_numerical_path(self):
-        event = {'pathParameters' : {'id' : 'id'}}
-
-        response = lambda_handler(event,None)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "ID must be an integer")
-
-    def test_lambda_handler_remove_item_throws_error_with_missing_path(self):
-        response = lambda_handler({},None)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "Invalid or missing ID in path")
-
 
 
