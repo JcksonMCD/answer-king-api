@@ -17,7 +17,7 @@ class TestCreateItem(unittest.TestCase):
         setup_mock_db(mock_get_db_connection, fetchone=(1, datetime.datetime(2025, 7, 2, 12, 0, 0)), description=self.mock_description)
 
         event = {'body' : json.dumps({'name' : 'Created', 'price' : 1.99, 'description': 'Created iteam'})}
-        expectedResponseBody = {'id': 1, 'name' : 'Created', 'price' : '1.99', 'description': 'Created iteam', 'created_at': '2025-07-02 12:00:00'}
+        expectedResponseBody = {'id': 1, 'name' : 'Created', 'price' : '1.99', 'description': 'Created iteam', 'created_at': '2025-07-02T12:00:00'}
 
         response = lambda_handler(event,None)
 
@@ -29,7 +29,7 @@ class TestCreateItem(unittest.TestCase):
         setup_mock_db(mock_get_db_connection, fetchone=(1, datetime.datetime(2025, 7, 2, 12, 0, 0)), description=self.mock_description)
 
         event = {'body' : json.dumps({'name' : 'Created', 'price' : 1.99})}
-        expectedResponseBody = {'id': 1, 'name' : 'Created', 'price' : '1.99', 'description': None, 'created_at': '2025-07-02 12:00:00'}
+        expectedResponseBody = {'id': 1, 'name' : 'Created', 'price' : '1.99', 'description': None, 'created_at': '2025-07-02T12:00:00'}
 
         response = lambda_handler(event,None)
 

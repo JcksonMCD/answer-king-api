@@ -118,7 +118,7 @@ def lambda_handler(event, context):
                 'name': name,
                 'price': str(price),
                 'description': description,
-                'created_at': str(created_at)
+                'created_at': created_at.isoformat()
             })
         }
     

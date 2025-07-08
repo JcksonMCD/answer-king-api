@@ -1,8 +1,8 @@
 import unittest
 import psycopg2
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 import json
-from api.items.get_all_items.get_all_items import lambda_handler
+from api.items.get_all_items.get_all_items import lambda_handler, json_default
 from test.helper_funcs.setup_mock_db import setup_mock_db
 import datetime
 
@@ -18,7 +18,7 @@ class TestGetAllItems(unittest.TestCase):
             (1, "Test Item", 1.99, "Test Item Description", datetime.datetime(2025, 7, 2, 12, 0, 0))
         ], description=self.mock_description)
 
-        expectedResponseBody = [{'id': '1', 'name': 'Test Item', 'price': '1.99', 'description': 'Test Item Description', 'created_at': '2025-07-02 12:00:00'}]
+        expectedResponseBody = [{'id': 1, 'name': 'Test Item', 'price': 1.99, 'description': 'Test Item Description', 'created_at': '2025-07-02T12:00:00'}]
 
         response = lambda_handler({},None)
 
@@ -27,9 +27,12 @@ class TestGetAllItems(unittest.TestCase):
 
     @patch("api.items.get_all_items.get_all_items.get_db_connection")
     def test_lambda_handler_returns_expected_items(self, mock_get_db_connection):
-        setup_mock_db(mock_get_db_connection, fetchall=[(1, "Test Item", 1.99, "Test Item Description", datetime.datetime(2025, 7, 2, 12, 0, 0)),(2, "Test Item 2", 2.99, "Test Item 2 Description", datetime.datetime(2025, 7, 2, 12, 0, 0))],description=self.mock_description)
+        setup_mock_db(mock_get_db_connection, fetchall=[(1, "Test Item", 1.99, "Test Item Description", datetime.datetime(2025, 7, 2, 12, 0, 0)),
+                                                        (2, "Test Item 2", 2.99, "Test Item 2 Description", datetime.datetime(2025, 7, 2, 12, 0, 0))
+                                                        ],description=self.mock_description)
 
-        expectedResponseBody = [{'id': '1', 'name': 'Test Item', 'price': '1.99', 'description': 'Test Item Description', 'created_at': '2025-07-02 12:00:00'}, {'id': '2', 'name': 'Test Item 2', 'description': 'Test Item 2 Description', 'price': '2.99', 'created_at': '2025-07-02 12:00:00'}]
+        expectedResponseBody = [{'id': 1, 'name': 'Test Item', 'price': 1.99, 'description': 'Test Item Description', 'created_at': '2025-07-02T12:00:00'}, 
+                                {'id': 2, 'name': 'Test Item 2', 'price': 2.99, 'description': 'Test Item 2 Description', 'created_at': '2025-07-02T12:00:00'}]
 
         response = lambda_handler({},None)
 
@@ -54,4 +57,25 @@ class TestGetAllItems(unittest.TestCase):
         response = lambda_handler({},None)
 
         self.assertEqual(response['statusCode'], 500)
-        self.assertIn('Database error', response['body'])
+        self.assertEqual(response['body'], {'error': 'Database error occured'})
+
+    @patch("api.items.get_all_items.get_all_items.get_db_connection")
+    def test_lambda_handler_throws_database_exception(self, mock_get_db_connection):
+        setup_mock_db(mock_get_db_connection, side_effect = Exception)
+
+        response = lambda_handler({},None)
+
+        self.assertEqual(response['statusCode'], 500)
+        self.assertEqual(response['body'], {'error': 'Database error occured'})
+
+    def test_default_json_handles_datetime(self):
+        dateObj = datetime.datetime(2025, 7, 2)
+        self.assertEqual(dateObj.isoformat(), json_default(dateObj))
+
+    def test_default_json_handles_string(self):
+        stringObj = "String Object"
+        self.assertEqual("String Object", json_default(stringObj))
+
+    def test_default_json_handles_float(self):
+        floatObj = 1.99
+        self.assertEqual("1.99", json_default(floatObj))
