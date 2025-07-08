@@ -4,13 +4,12 @@ import psycopg2
 from db_connection import get_db_connection
 
 def lambda_handler(event, context):
-    # Parse and validate request
     try:
         body = json.loads(event['body'])
         name = body.get('name')
         if not name: 
             raise KeyError('Name field missing')
-        price = float(body['price'])  # Validate numeric type
+        price = float(body['price'])
         description = body.get('description')
     except (KeyError, json.JSONDecodeError, ValueError) as e:
         return {
@@ -18,7 +17,6 @@ def lambda_handler(event, context):
             'body': json.dumps({'error': 'Invalid request data'})
         }
 
-    # Database operation
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
@@ -32,7 +30,6 @@ def lambda_handler(event, context):
                 
                 item_id, created_at = cursor.fetchone()
         
-        # Format response
         return {
             'statusCode': 201,
             'body': json.dumps({
@@ -40,7 +37,7 @@ def lambda_handler(event, context):
                 'name': name,
                 'price': price,
                 'description': description,
-                'created_at': created_at.isoformat()
+                'created_at': str(created_at)
             })
         }
         
