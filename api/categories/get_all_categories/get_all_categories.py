@@ -1,13 +1,7 @@
-import datetime
-import os
 import json
 import psycopg2
 from db_connection import get_db_connection
-
-def json_default(obj):
-    if isinstance(obj, (datetime.datetime, datetime.date)):
-        return obj.isoformat()
-    return str(obj)
+from json_default import json_default
 
 def lambda_handler(event, context):
     try:

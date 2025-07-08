@@ -1,16 +1,11 @@
 import logging
 import json
 import psycopg2
-import datetime
 from db_connection import get_db_connection
+from json_default import json_default
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-def json_default(obj):
-    if isinstance(obj, (datetime.datetime, datetime.date)):
-        return obj.isoformat()
-    return str(obj)
 
 def get_all_items_from_db():
     try:

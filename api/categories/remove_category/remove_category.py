@@ -1,4 +1,3 @@
-import os
 import json
 import psycopg2
 from db_connection import get_db_connection

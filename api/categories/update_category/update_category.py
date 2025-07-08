@@ -1,13 +1,6 @@
-import os
 import json
 import psycopg2
-import datetime
 from db_connection import get_db_connection
-
-def json_default(obj):
-    if isinstance(obj, (datetime.datetime, datetime.date)):
-        return obj.isoformat()
-    return str(obj)  
 
 def lambda_handler(event, context):
     try:
@@ -44,7 +37,7 @@ def lambda_handler(event, context):
 
         return {
             'statusCode': 200,
-            'body': json.dumps(category, default=json_default)
+            'body': json.dumps(category)
         }
         
     except psycopg2.Error as e:

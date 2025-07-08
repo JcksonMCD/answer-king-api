@@ -1,13 +1,6 @@
-import os
 import json
 import psycopg2
-import decimal
 from db_connection import get_db_connection
-
-def decimal_default(obj):
-    if isinstance(obj, decimal.Decimal):
-        return float(obj)
-    return str(obj)
 
 def get_active_category(cursor, category_id):
     cursor.execute(
@@ -52,7 +45,7 @@ def lambda_handler(event, context):
 
         return {
             'statusCode': 200,
-            'body': json.dumps(items, default=decimal_default)
+            'body': json.dumps(items)
         }
         
     except psycopg2.Error as e:
