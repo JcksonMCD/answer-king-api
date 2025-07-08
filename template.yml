@@ -42,6 +42,14 @@ Resources:
       ContentUri: api/lambda_layers/validate_items_request_body
       CompatibleRuntimes:
         - python3.13
+  ValidateIdPathParamLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: validate-id-path-param-layer
+      Description: Validates id path parameter
+      ContentUri: api/lambda_layers/validate_id_path_param
+      CompatibleRuntimes:
+        - python3.13
 
   CreateItemFunction:
     Type: AWS::Serverless::Function
@@ -80,6 +88,7 @@ Resources:
       Handler: remove_item.lambda_handler
       Layers:
         - !Ref DBConnectionLayer
+        - !Ref ValidateIdPathParamLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -140,6 +149,7 @@ Resources:
       Layers:
         - !Ref DBConnectionLayer
         - !Ref JsonDefaultLayer
+        - !Ref ValidateIdPathParamLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -171,6 +181,7 @@ Resources:
         - !Ref DBConnectionLayer
         - !Ref ValidateItemsRequestBodyLayer
         - !Ref JsonDefaultLayer
+        - !Ref ValidateIdPathParamLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -259,6 +270,7 @@ Resources:
       Handler: remove_category.lambda_handler
       Layers:
         - !Ref DBConnectionLayer
+        - !Ref ValidateIdPathParamLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -288,6 +300,7 @@ Resources:
       Handler: update_category.lambda_handler
       Layers:
         - !Ref DBConnectionLayer
+        - !Ref ValidateIdPathParamLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -317,6 +330,7 @@ Resources:
       Handler: add_item_to_category.lambda_handler
       Layers:
         - !Ref DBConnectionLayer
+        - !Ref ValidateIdPathParamLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -349,6 +363,7 @@ Resources:
       Handler: get_items_by_category.lambda_handler
       Layers:
         - !Ref DBConnectionLayer
+        - !Ref ValidateIdPathParamLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:

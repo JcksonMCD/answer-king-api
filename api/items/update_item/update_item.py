@@ -4,29 +4,10 @@ import psycopg2
 from db_connection import get_db_connection
 from validate_items_request_body import validate_event_body
 from json_default import json_default
+from validate_id_path_param import extract_id
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-def extract_item_id(event):
-    try:
-        path_params = event.get('pathParameters') or {}
-        item_id = path_params.get('id')
-
-        if not item_id:
-            logger.info('No path parameter labeled id')
-            return {
-                'statusCode': 400,
-                'body': json.dumps({'error': 'Invalid or missing ID in path'})
-            }
-        
-        return int(item_id)
-    except ValueError as e:
-        logger.error(f'Path ID not an int value: {e}')
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'ID must be an integer'})
-        }
 
 def update_item_in_db(item_id, name, price, description):
     try:
@@ -69,7 +50,7 @@ def update_item_in_db(item_id, name, price, description):
     
 def lambda_handler(event, context):
     try:
-        item_id_response = extract_item_id(event)
+        item_id_response = extract_id(event, logger)
         if isinstance(item_id_response, dict) and 'statusCode' in item_id_response:
             return item_id_response
 

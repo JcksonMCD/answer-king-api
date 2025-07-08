@@ -3,29 +3,10 @@ import json
 import psycopg2
 from db_connection import get_db_connection
 from json_default import json_default
+from validate_id_path_param import extract_id
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
-
-def extract_item_id(event):
-    try:
-        path_params = event.get('pathParameters') or {}
-        item_id = path_params.get('id')
-
-        if not item_id:
-            logger.info('No path parameter labeled id')
-            return {
-                'statusCode': 400,
-                'body': json.dumps({'error': 'Invalid or missing ID in path'})
-            }
-        
-        return int(item_id)
-    except ValueError as e:
-        logger.error(f'Path ID not an int value: {e}')
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'ID must be an integer'})
-        }
     
 def get_item_from_db(item_id):
     try:
@@ -68,7 +49,7 @@ def get_item_from_db(item_id):
     
 def lambda_handler(event, context):
     try:
-        item_id_result = extract_item_id(event)
+        item_id_result = extract_id(event, logger)
 
         if isinstance(item_id_result, dict) and 'statusCode' in item_id_result:
             return item_id_result
