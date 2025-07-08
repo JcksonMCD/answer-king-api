@@ -54,6 +54,15 @@ class TestCreateItem(unittest.TestCase):
         self.assertEqual(response['statusCode'], 400)
         self.assertEqual(body["error"], "Name field is required and must be of type string")
 
+    def test_lambda_handler_create_item_throws_error_with_non_string_name(self):
+        event = {'body' : json.dumps({'name': 1, 'price' : 1.99, 'description': 'Created iteam'})}
+
+        response = lambda_handler(event,None)
+        body = json.loads(response['body'])
+
+        self.assertEqual(response['statusCode'], 400)
+        self.assertEqual(body["error"], "Name field is required and must be of type string")
+
     def test_lambda_handler_create_item_throws_error_with_negative_price(self):
         event = {'body' : json.dumps({'name' : 'Created', 'price': -1.99, 'description': 'Created iteam'})}
 
@@ -108,3 +117,15 @@ class TestCreateItem(unittest.TestCase):
 
         self.assertEqual(response['statusCode'], 500)
         self.assertEqual(body["error"], "Database error")
+    
+    @patch("api.items.create_item.create_item.get_db_connection")
+    def test_lambda_handler_create_item_throws_error_when_db_returns_nothing(self, mock_get_db_connection):
+        setup_mock_db(mock_get_db_connection, fetchone=())
+
+        event = {'body' : json.dumps({'name' : 'Created', 'price' : 1.99, 'description': 'Created iteam'})}
+
+        response = lambda_handler(event,None)
+        body = json.loads(response['body'])
+
+        self.assertEqual(response['statusCode'], 500)
+        self.assertEqual(body["error"], "Failed to create item")
