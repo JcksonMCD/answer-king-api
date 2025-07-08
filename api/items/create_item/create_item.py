@@ -1,14 +1,21 @@
-import os
 import json
 import psycopg2
 from db_connection import get_db_connection
 
-def lambda_handler(event, context):
+def load_event_body(event):
+    if not event.get('body'):
+        return {
+            'statusCode': 400,
+            'body': json.dumps({'error': 'Request body is required'})
+        }
+    
     try:
         body = json.loads(event['body'])
+
         name = body.get('name')
-        if not name: 
-            raise KeyError('Name field missing')
+        if not name or not isinstance(name, str): 
+            raise ValueError('Name field requires a value')
+        
         price = float(body['price'])
         description = body.get('description')
     except (KeyError, json.JSONDecodeError, ValueError) as e:
@@ -16,7 +23,10 @@ def lambda_handler(event, context):
             'statusCode': 400,
             'body': json.dumps({'error': 'Invalid request data'})
         }
+    
+    return name, price, description
 
+def post_item_to_db(name, price, description):
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
@@ -29,20 +39,27 @@ def lambda_handler(event, context):
                     (name, price, description))
                 
                 item_id, created_at = cursor.fetchone()
-        
-        return {
-            'statusCode': 201,
-            'body': json.dumps({
-                'id': item_id,
-                'name': name,
-                'price': price,
-                'description': description,
-                'created_at': str(created_at)
-            })
-        }
-        
     except psycopg2.Error as e:
         return {
             'statusCode': 500,
             'body': json.dumps({'error': 'Database error'})
         }
+    
+    return item_id, created_at
+
+def lambda_handler(event, context):
+    name, price, description = load_event_body(event)
+
+    item_id, created_at = post_item_to_db(name, price, description)
+
+    return {
+        'statusCode': 201,
+        'body': json.dumps({
+            'id': item_id,
+            'name': name,
+            'price': price,
+            'description': description,
+            'created_at': str(created_at)
+        })
+    }
+        
