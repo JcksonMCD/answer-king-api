@@ -1,5 +1,3 @@
-from decimal import Decimal
-import decimal
 import logging
 import json
 import psycopg2
@@ -59,7 +57,7 @@ def validate_event_body(event):
                 'body': json.dumps({'error': 'Price cannot be negative'})
             }
         
-    except (decimal.InvalidOperation, ValueError, TypeError) as e:
+    except (ValueError, TypeError) as e:
         return {
             'statusCode': 400,
             'body': json.dumps({'error': 'Price must be a valid number'})
