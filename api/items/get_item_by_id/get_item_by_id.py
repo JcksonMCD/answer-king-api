@@ -1,7 +1,6 @@
 import logging
 import json
 import psycopg2
-import decimal
 import datetime
 from db_connection import get_db_connection
 
@@ -11,8 +10,6 @@ logger.setLevel(logging.INFO)
 def json_default(obj):
     if isinstance(obj, (datetime.datetime, datetime.date)):
         return obj.isoformat()
-    if isinstance(obj, decimal.Decimal):
-        return float(obj)
     return str(obj)  
 
 def extract_item_id(event):
