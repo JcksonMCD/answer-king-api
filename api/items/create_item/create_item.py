@@ -46,7 +46,12 @@ def validate_event_body(event):
         }
     
     try:
-        price = Decimal(str(price_raw))
+        price = float(price_raw)
+        if price != round(price, 2):
+            return {
+                'statusCode': 400,
+                'body': json.dumps({'error': 'Price has to be to two decimal points'})
+            }
 
         if price < 0:
             return {
@@ -116,7 +121,7 @@ def lambda_handler(event, context):
             'body': json.dumps({
                 'id': item_id,
                 'name': name,
-                'price': str(price),
+                'price': price,
                 'description': description,
                 'created_at': created_at.isoformat()
             })
