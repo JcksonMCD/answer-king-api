@@ -81,6 +81,7 @@ def post_item_to_category_in_db(category_id, item_id):
                 conn.commit()
                 
                 logger.info(f'Successfully added Item at ID {item_id} to Category at ID {category_id}')   
+
                 return {
                     'statusCode': 201,
                     'body': json.dumps({
