@@ -4,7 +4,6 @@ from unittest.mock import patch
 import json
 from api.categories.update_category.update_category import lambda_handler
 from test.helper_funcs.setup_mock_db import setup_mock_db
-import datetime
 
 class TestUpdateCategory(unittest.TestCase):
     def setUp(self):

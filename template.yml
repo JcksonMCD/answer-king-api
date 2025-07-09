@@ -58,6 +58,14 @@ Resources:
       ContentUri: api/lambda_layers/validate_categories_request_body
       CompatibleRuntimes:
         - python3.13
+  ValidateItemIdQueryStringParamLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: validate-item-id-query-param-layer
+      Description: Validates item id query string parameter
+      ContentUri: api/lambda_layers/validate_item_id_query_param
+      CompatibleRuntimes:
+        - python3.13
 
   CreateItemFunction:
     Type: AWS::Serverless::Function
@@ -341,6 +349,7 @@ Resources:
       Layers:
         - !Ref DBConnectionLayer
         - !Ref ValidateIdPathParamLayer
+        - !Ref ValidateItemIdQueryStringParamLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:

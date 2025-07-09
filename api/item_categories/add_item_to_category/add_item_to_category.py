@@ -1,6 +1,7 @@
 import json
 import psycopg2
 from db_connection import get_db_connection
+from validate_id_path_param import extract_id
 
 def get_active_item(cursor, item_id):
     cursor.execute(
@@ -16,7 +17,12 @@ def get_active_category(cursor, category_id):
 
 def lambda_handler(event, context):
     try:
-        category_id = int(event['pathParameters']['id'])
+        category_id_response = extract_id(event, logger)
+        if isinstance(category_id_response, dict) and 'statusCode' in category_id_response:
+            return category_id_response
+
+        category_id = category_id_response
+        
         item_id = int(event["queryStringParameters"]['itemID'])
 
     except (KeyError, json.JSONDecodeError, ValueError) as e:
