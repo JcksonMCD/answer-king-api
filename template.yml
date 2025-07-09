@@ -66,6 +66,14 @@ Resources:
       ContentUri: api/lambda_layers/validate_item_id_query_param
       CompatibleRuntimes:
         - python3.13
+  GetActiveRowFromTableLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: get-active-row-from-table-layer
+      Description: Gets active row from table by id
+      ContentUri: api/lambda_layers/get_active_row_from_table
+      CompatibleRuntimes:
+        - python3.13
 
   CreateItemFunction:
     Type: AWS::Serverless::Function
@@ -350,6 +358,7 @@ Resources:
         - !Ref DBConnectionLayer
         - !Ref ValidateIdPathParamLayer
         - !Ref ValidateItemIdQueryStringParamLayer
+        - !Ref GetActiveRowFromTableLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
