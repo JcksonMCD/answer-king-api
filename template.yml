@@ -50,6 +50,14 @@ Resources:
       ContentUri: api/lambda_layers/validate_id_path_param
       CompatibleRuntimes:
         - python3.13
+  ValidateCategoriesRequestBodyLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: validate-categories-request-body-layer
+      Description: Validates categories request body is accepted
+      ContentUri: api/lambda_layers/validate_categories_request_body
+      CompatibleRuntimes:
+        - python3.13
 
   CreateItemFunction:
     Type: AWS::Serverless::Function
@@ -211,6 +219,7 @@ Resources:
       Handler: create_category.lambda_handler
       Layers:
         - !Ref DBConnectionLayer
+        - !Ref ValidateCategoriesRequestBodyLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -301,6 +310,7 @@ Resources:
       Layers:
         - !Ref DBConnectionLayer
         - !Ref ValidateIdPathParamLayer
+        - !Ref ValidateCategoriesRequestBodyLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
