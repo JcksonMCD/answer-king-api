@@ -79,7 +79,7 @@ def lambda_handler(event, context):
         logger.info(f'Successfully processed DELETE request for item ID: {item_id}')
         return {
             'statusCode': 204,
-            'body': json.dumps({'deleted_id': delete_result[0]})
+            'body': ''
         }
 
     except Exception as e:

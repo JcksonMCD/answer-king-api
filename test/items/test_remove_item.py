@@ -16,12 +16,10 @@ class TestRemoveItem(unittest.TestCase):
         setup_mock_db(mock_get_db_connection, fetchone=(1,), description=self.mock_description)
 
         event = {'pathParameters' : {'id' : '1'}}
-        expectedResponseBody = {'deleted_id': 1}
 
         response = lambda_handler(event,None)
 
         self.assertEqual(response['statusCode'], 204)
-        self.assertEqual(json.loads(response['body']), expectedResponseBody)
 
     @patch("api.items.remove_item.remove_item.get_db_connection")
     def test_lambda_handler_throws_error_when_db_errors(self, mock_get_db_connection):

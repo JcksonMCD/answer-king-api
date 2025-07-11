@@ -14,7 +14,8 @@ def get_all_categories_from_db():
                 cursor.execute(
                     """
                     SELECT id, name, created_at FROM categories
-                    WHERE deleted = false;
+                    WHERE deleted = false
+                    ORDER BY created_at DESC;
                     """
                     )
                 rows = cursor.fetchall()

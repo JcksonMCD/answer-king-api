@@ -16,6 +16,7 @@ def delete_category_from_db(category_id):
                     UPDATE categories 
                     SET deleted = true
                     WHERE id = %s
+                    AND deleted = false
                     RETURNING id;
 
                     """,
@@ -29,7 +30,10 @@ def delete_category_from_db(category_id):
                         'body': json.dumps({'error': f"No Category found at ID: {category_id}"})
                     }
                 
-                return deleted
+                conn.commit()
+                
+                deleted_id = deleted[0]
+                return deleted_id
             
     except psycopg2.Error as e:
         logger.error(f"Database error: {e}")
@@ -38,7 +42,7 @@ def delete_category_from_db(category_id):
             'body': json.dumps({'error': 'Database error'})
         }
     except Exception as e:
-        logger.error(f"Unexpected error while updating item: {e}")
+        logger.error(f"Unexpected error while deleting category: {e}")
         return {
             'statusCode': 500,
             'body': json.dumps({'error': 'Internal server error'})
@@ -58,7 +62,7 @@ def lambda_handler(event, context):
 
         return {
             'statusCode': 204,
-            'body': json.dumps({'deleted_category_id': deleted_response[0]})
+            'body': ''
         }
 
     except Exception as e:

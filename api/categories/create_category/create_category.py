@@ -16,7 +16,7 @@ def post_category_to_db(name):
                     """
                     INSERT INTO categories (name)
                     VALUES (%s)
-                    RETURNING id, name, description, created_at;
+                    RETURNING id, name, created_at;
                     """,
                     (name,))
                 
@@ -71,5 +71,5 @@ def lambda_handler(event, context):
         logger.error(f'Unhandled exception in lambda_handler: {e}', exc_info=True)
         return {
             'statusCode': 500,
-            'body': json.dumps({'error': f'Internal server error'})
+            'body': json.dumps({'error': 'Internal server error'})
         }
