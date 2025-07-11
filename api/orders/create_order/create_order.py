@@ -1,8 +1,13 @@
 import json
 import psycopg2
+import logging
 from db_connection import get_db_connection
+from json_default import json_default
 
-def lambda_handler(event, context):
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+
+def post_order_to_db():
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
@@ -15,26 +20,47 @@ def lambda_handler(event, context):
                     """,
                     )
                 
-                result = cursor.fetchone()
-                if not result:
+                response = cursor.fetchone()
+                if not response:
+                    logger.error("Failed to create order - no result returned")
                     return {
                         'statusCode': 500,
-                        'body': json.dumps({'error': 'No data returned from DB'})
+                        'body': json.dumps({'error': 'Failed to create order'})
                     }
-                order_id, order_status, order_total, created_at = result
+                
+                colnames = [desc[0] for desc in cursor.description]
+                order = dict(zip(colnames, response))
+                conn.commit()
         
-        return {
-            'statusCode': 201,
-            'body': json.dumps({
-                'id': order_id,
-                'status' : order_status,
-                'total' : str(order_total),
-                'created_at': created_at.isoformat()
-            })
-        }
-        
+        return order
     except psycopg2.Error as e:
+        logger.error(f"Database error: {e}")
         return {
             'statusCode': 500,
-            'body': json.dumps({'error': 'Database error', "message" : str(e)})
+            'body': json.dumps({'error': 'Database error'})
+        }
+    except Exception as e:
+        logger.error(f"Unexpected error while updating item: {e}")
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': 'Internal server error'})
+        }
+
+def lambda_handler(event, context):
+    try:
+        create_order_response = post_order_to_db()
+        if isinstance(create_order_response, dict) and 'statusCode' in create_order_response:
+            return create_order_response
+                
+        logger.info(f"Order creation successful: {create_order_response}")
+        return {
+            'statusCode': 200,
+            'body': json.dumps(create_order_response, default=json_default)
+        }
+        
+    except Exception as e:
+        logger.error(f'Unhandled exception in lambda_handler: {e}', exc_info=True)
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': 'Internal server error'})
         }

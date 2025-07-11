@@ -424,6 +424,7 @@ Resources:
       Handler: create_order.lambda_handler
       Layers:
         - !Ref DBConnectionLayer
+        - !Ref JsonDefaultLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
