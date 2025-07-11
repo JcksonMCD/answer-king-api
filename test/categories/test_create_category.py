@@ -15,7 +15,7 @@ class TestCreateCategory(unittest.TestCase):
     @patch("api.categories.create_category.create_category.get_db_connection")
     def test_lambda_handler_creates_expected_category(self, mock_get_db_connection):
         setup_mock_db(mock_get_db_connection, 
-                           fetchone=(1, datetime.datetime(2025, 7, 2, 12, 0, 0)),
+                           fetchone=(1, 'Created', datetime.datetime(2025, 7, 2, 12, 0, 0)),
                            description=self.mock_description)
 
         event = {'body' : json.dumps({'name' : 'Created'})}

@@ -16,7 +16,7 @@ def post_category_to_db(name):
                     """
                     INSERT INTO categories (name)
                     VALUES (%s)
-                    RETURNING id, created_at;
+                    RETURNING id, name, description, created_at;
                     """,
                     (name,))
                 

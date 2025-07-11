@@ -16,7 +16,7 @@ def post_item_to_db(name, price, description):
                     """
                     INSERT INTO items (name, price, description)
                     VALUES (%s, %s, %s)
-                    RETURNING id, created_at
+                    RETURNING id, name, price, description, created_at
                     """,
                     (name, price, description))
                 
