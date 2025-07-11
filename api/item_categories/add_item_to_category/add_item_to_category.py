@@ -16,18 +16,12 @@ def validate_entities_exist(cursor, category_id, item_id):
     get_active_row_from_table(cursor, table_name='categories', id=category_id)
 
 def create_item_category_association(cursor, category_id, item_id):
-    try:
-        cursor.execute(
+    cursor.execute(
         """
         INSERT INTO item_categories (item_id, category_id)
         VALUES (%s, %s)
         """,
         (item_id, category_id))
-            
-    except psycopg2.errors.UniqueViolation as e:
-        message = f"Item at ID {item_id} is already added to Category with ID {category_id}"
-        logger.error(message)
-        raise ValidationError(message)
 
 def post_item_to_category_in_db(category_id, item_id):
     try:        
@@ -35,7 +29,12 @@ def post_item_to_category_in_db(category_id, item_id):
             with conn.cursor() as cursor:
                 validate_entities_exist(cursor, category_id, item_id)
                 
-                create_item_category_association(cursor, category_id, item_id)
+                try:
+                    create_item_category_association(cursor, category_id, item_id)
+                except psycopg2.errors.UniqueViolation:
+                    message = f"Item at ID {item_id} is already added to Category with ID {category_id}"
+                    logger.error(message)
+                    raise ValidationError(message)
                 
                 conn.commit()
                 
@@ -48,6 +47,10 @@ def post_item_to_category_in_db(category_id, item_id):
                     })
                 }
                
+    except ValidationError:
+        raise
+    except ActiveResourceNotFoundError:
+        raise
     except psycopg2.Error as e:
         logger.error(f"Database error while adding item to category: {e}")
         raise
@@ -84,5 +87,4 @@ def lambda_handler(event, context):
         return {
             'statusCode': 500,
             'body': json.dumps({'error': 'Internal server error'})
-        }    
-
+        }
