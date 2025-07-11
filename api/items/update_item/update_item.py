@@ -45,7 +45,7 @@ def update_item_in_db(item_id, name, price, description):
         logger.error(f"Unexpected error while updating item: {e}")
         return {
             'statusCode': 500,
-            'body': json.dumps({'error': f'Internal server error {e}'})
+            'body': json.dumps({'error': 'Internal server error'})
         }
     
 def lambda_handler(event, context):
@@ -75,5 +75,5 @@ def lambda_handler(event, context):
         logger.error(f'Unhandled exception in lambda_handler: {e}', exc_info=True)
         return {
             'statusCode': 500,
-            'body': json.dumps({'error': f'Internal server error {e}'})
+            'body': json.dumps({'error': f'Internal server error'})
         }
