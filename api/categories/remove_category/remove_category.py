@@ -16,7 +16,6 @@ def delete_category_from_db(category_id):
                     UPDATE categories 
                     SET deleted = true
                     WHERE id = %s
-                    AND deleted = false
                     RETURNING id;
 
                     """,
