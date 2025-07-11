@@ -32,11 +32,17 @@ def get_all_items_from_db():
                 return items
                 
     except psycopg2.Error as e:
-        logger.error(f"Database error while fetching items: {e}")
-        raise psycopg2.DatabaseError(f"Failed to retrieve items from database: {str(e)}")
+        logger.error(f"Database error: {e}")
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': 'Database error'})
+        }
     except Exception as e:
         logger.error(f"Unexpected error while fetching items: {e}")
-        raise psycopg2.DatabaseError(f"Unexpected error: {str(e)}")
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': 'Internal server error'})
+        }
 
 def lambda_handler(event, context):
     try:
@@ -47,13 +53,6 @@ def lambda_handler(event, context):
         return {
             'statusCode': 200,
             'body': json.dumps(items, default=json_default)
-        }
-        
-    except psycopg2.DatabaseError as e:
-        logger.error(f"Database error in lambda handler: {e}")
-        return {
-            'statusCode': 500,
-            'body': {'error': 'Database error occured'}
         }
         
     except Exception as e:

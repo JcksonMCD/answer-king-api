@@ -34,7 +34,7 @@ def post_category_to_db(name):
                 conn.commit()
                 
                 return category
-                
+           
     except psycopg2.Error as e:
         logger.error(f"Database error: {e}")
         return {
@@ -42,7 +42,7 @@ def post_category_to_db(name):
             'body': json.dumps({'error': 'Database error'})
         }
     except Exception as e:
-        logger.error(f"Unexpected error while updating item: {e}")
+        logger.error(f"Unexpected error while creating category: {e}")
         return {
             'statusCode': 500,
             'body': json.dumps({'error': 'Internal server error'})
