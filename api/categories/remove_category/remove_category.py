@@ -1,11 +1,9 @@
 import json
 import psycopg2
-import logging
-from db_connection import get_db_connection
-from validate_id_path_param import extract_id
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+from utils.logger import logger
+from utils.db_connection import get_db_connection
+from utils.validation import extract_id_path_param
+from utils.custom_exceptions import ResourceNotFoundError, ValidationError
 
 def delete_category_from_db(category_id):
     try:
@@ -24,48 +22,53 @@ def delete_category_from_db(category_id):
 
                 deleted = cursor.fetchone()
                 if not deleted:
-                    return {
-                        'statusCode': 404,
-                        'body': json.dumps({'error': f"No Category found at ID: {category_id}"})
-                    }
-                
+                    logger.info(f"Category with ID {category_id} not found for deletion.")
+                    raise ResourceNotFoundError(f"Category with ID {category_id} not found")
+
                 conn.commit()
                 
                 deleted_id = deleted[0]
                 return deleted_id
             
     except psycopg2.Error as e:
-        logger.error(f"Database error: {e}")
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Database error'})
-        }
+        logger.error(f"Database error while deleting category: {e}")
+        raise
     except Exception as e:
         logger.error(f"Unexpected error while deleting category: {e}")
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Internal server error'})
-        }
+        raise
 
 def lambda_handler(event, context):
     try:
-        category_id_response = extract_id(event, logger)
-        if isinstance(category_id_response, dict) and 'statusCode' in category_id_response:
-            return category_id_response
+        category_id = extract_id_path_param(event)
         
-        category_id = category_id_response
+        deleted = delete_category_from_db(category_id)
 
-        deleted_response = delete_category_from_db(category_id)
-        if isinstance(deleted_response, dict) and 'statusCode' in deleted_response:
-            return deleted_response
-
+        logger.info(f'Category successfully deleted at ID: {deleted}')
         return {
             'statusCode': 204,
             'body': ''
         }
 
+    except ValidationError as e:
+        logger.warning(f'Validation error: {e.message}')
+        return {
+            'statusCode': e.status_code,
+            'body': json.dumps({'error': e.message})
+        }
+    except ResourceNotFoundError as e:
+        logger.warning(f'Database insert error: {e.message}')
+        return {
+            'statusCode': e.status_code,
+            'body': json.dumps({'error': e.message})
+        }
+    except psycopg2.Error as e:
+        logger.error(f'Database error: {e}')
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': 'Database error'})
+        }
     except Exception as e:
-        logger.error(f'Unhandled exception in lambda_handler: {e}', exc_info=True)
+        logger.error(f'Unhandled exception: {e}', exc_info=True)
         return {
             'statusCode': 500,
             'body': json.dumps({'error': 'Internal server error'})

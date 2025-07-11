@@ -1,30 +1,9 @@
-import logging
 import json
 import psycopg2
-from db_connection import get_db_connection
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-
-def extract_item_id(event):
-    try:
-        path_params = event.get('pathParameters') or {}
-        item_id = path_params.get('id')
-
-        if not item_id:
-            logger.info('No path parameter labeled id')
-            return {
-                'statusCode': 400,
-                'body': json.dumps({'error': 'Invalid or missing ID in path'})
-            }
-        
-        return int(item_id)
-    except ValueError as e:
-        logger.error(f'Path ID not an int value: {e}')
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'ID must be an integer'})
-        }
+from utils.logger import logger
+from utils.db_connection import get_db_connection
+from utils.validation import extract_id_path_param
+from utils.custom_exceptions import ValidationError, ResourceNotFoundError
 
 def remove_item_from_db(item_id):
     try:
@@ -42,49 +21,52 @@ def remove_item_from_db(item_id):
 
                 deleted = cursor.fetchone()
                 if not deleted:
-                    return {
-                        'statusCode': 404,
-                        'body': json.dumps({'error': f'Item not found at ID: {item_id}'})
-                    }
+                    logger.info(f"Item with ID {item_id} not found.")
+                    raise ResourceNotFoundError(f"Item with ID {item_id} not found")
                 
                 conn.commit()
-                return deleted
-            
+                
+                logger.info(f'Successfully processed DELETE request for item ID: {item_id}')
+
     except psycopg2.Error as e:
-        logger.error(f'Error occured while fetching item from database: {e}')
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Database error'})
-        }
+        logger.error(f"Database error while deleting item: {e}")
+        raise
     except Exception as e:
-        logger.error(f'Unexpected error while fetching item {item_id}: {e}')
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Internal server error'})
-        }
+        logger.error(f"Unexpected error while deleting item: {e}")
+        raise
     
 def lambda_handler(event, context):
     try:
-        item_id_result = extract_item_id(event)
+        item_id = extract_id_path_param(event)
 
-        if isinstance(item_id_result, dict) and 'statusCode' in item_id_result:
-            return item_id_result
+        remove_item_from_db(item_id)
 
-        item_id = item_id_result
-
-        delete_result = remove_item_from_db(item_id)
-        if isinstance(delete_result, dict) and 'statusCode' in delete_result:
-            return delete_result
-        
-        logger.info(f'Successfully processed DELETE request for item ID: {item_id}')
         return {
             'statusCode': 204,
             'body': ''
         }
 
+    except ValidationError as e:
+        logger.warning(f'Validation error: {e.message}')
+        return {
+            'statusCode': e.status_code,
+            'body': json.dumps({'error': e.message})
+        }
+    except ResourceNotFoundError as e:
+        logger.warning(f'Resource not found: {e.message}')
+        return {
+            'statusCode': e.status_code,
+            'body': json.dumps({'error': e.message})
+        }
+    except psycopg2.Error as e:
+        logger.error(f'Database error: {e}', exc_info=True)
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': 'Database error'})
+        }
     except Exception as e:
-        logger.error(f'Unhandled exception in lambda_handler: {e}', exc_info=True)
+        logger.error(f'Unhandled exception: {e}', exc_info=True)
         return {
             'statusCode': 500,
             'body': json.dumps({'error': 'Internal server error'})
-        }
+        }   

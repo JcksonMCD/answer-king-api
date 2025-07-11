@@ -1,11 +1,9 @@
 import json
 import psycopg2
-import logging
-from db_connection import get_db_connection
-from json_default import json_default
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+from utils.logger import logger
+from utils.db_connection import get_db_connection
+from utils.json_default import json_default
+from utils.custom_exceptions import DatabaseInsertError
 
 def post_order_to_db():
     try:
@@ -23,44 +21,46 @@ def post_order_to_db():
                 response = cursor.fetchone()
                 if not response:
                     logger.error("Failed to create order - no result returned")
-                    return {
-                        'statusCode': 500,
-                        'body': json.dumps({'error': 'Failed to create order'})
-                    }
+                    raise DatabaseInsertError("Failed to create order - no result returned")
                 
                 colnames = [desc[0] for desc in cursor.description]
                 order = dict(zip(colnames, response))
                 conn.commit()
-        
-        return order
+                
+                logger.info(f"Order creation successful")
+                return order
+    
     except psycopg2.Error as e:
-        logger.error(f"Database error: {e}")
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Database error'})
-        }
+        logger.error(f"Database error while creating order: {e}")
+        raise
     except Exception as e:
-        logger.error(f"Unexpected error while updating item: {e}")
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Internal server error'})
-        }
-
+        logger.error(f"Unexpected error while creating order: {e}")
+        raise
+    
 def lambda_handler(event, context):
     try:
         create_order_response = post_order_to_db()
-        if isinstance(create_order_response, dict) and 'statusCode' in create_order_response:
-            return create_order_response
                 
-        logger.info(f"Order creation successful: {create_order_response}")
         return {
             'statusCode': 200,
             'body': json.dumps(create_order_response, default=json_default)
         }
         
+    except DatabaseInsertError as e:
+        logger.warning(f'Resource not found: {e.message}')
+        return {
+            'statusCode': e.status_code,
+            'body': json.dumps({'error': e.message})
+        }
+    except psycopg2.Error as e:
+        logger.error(f'Database error: {e}', exc_info=True)
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': 'Database error'})
+        }
     except Exception as e:
-        logger.error(f'Unhandled exception in lambda_handler: {e}', exc_info=True)
+        logger.error(f'Unhandled exception: {e}', exc_info=True)
         return {
             'statusCode': 500,
             'body': json.dumps({'error': 'Internal server error'})
-        }
+        }  

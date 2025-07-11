@@ -38,7 +38,7 @@ class TestRemoveCategory(unittest.TestCase):
         setup_mock_db(mock_get_db_connection, fetchone=())
 
         event = {'pathParameters' : {'id' : '1'}}
-        expectedResponseBody = {'error': 'No Category found at ID: 1'}
+        expectedResponseBody = {'error': 'Category with ID 1 not found'}
 
         response = lambda_handler(event,None)
 

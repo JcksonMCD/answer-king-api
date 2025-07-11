@@ -45,7 +45,7 @@ class TestUpdateItem(unittest.TestCase):
         body = json.loads(response['body'])
 
         self.assertEqual(response['statusCode'], 404)
-        self.assertEqual(body["error"], "No Active Item found at ID: 1")
+        self.assertEqual(body["error"], "Active Item with ID 1 not found")
 
     @patch("api.items.update_item.update_item.get_db_connection")
     def test_lambda_handler_update_item_throws_error_when_db_throws_error(self, mock_get_db_connection):

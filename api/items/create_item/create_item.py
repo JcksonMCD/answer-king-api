@@ -1,12 +1,10 @@
-import logging
 import json
 import psycopg2
-from db_connection import get_db_connection
-from validate_items_request_body import validate_event_body
-from json_default import json_default
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+from utils.logger import logger
+from utils.db_connection import get_db_connection
+from utils.validation import validate_item_event_body
+from utils.json_default import json_default
+from utils.custom_exceptions import ValidationError, DatabaseInsertError
 
 def post_item_to_db(name, price, description):
     try:
@@ -24,46 +22,53 @@ def post_item_to_db(name, price, description):
 
                 if not response:
                     logger.error("Failed to insert item - no result returned")
-                    return {
-                        'statusCode': 500,
-                        'body': json.dumps({'error': 'Failed to create item'})
-                    }
+                    raise DatabaseInsertError("Failed to insert item - no result returned")
                 
                 colnames = [desc[0] for desc in cursor.description]
                 item = dict(zip(colnames, response))
                 conn.commit()
 
-        return item
+                logger.info(f"Successfully created item: {name}")
+                return item
                 
     except psycopg2.Error as e:
-        logger.error(f"Database error: {e}")
+        logger.error(f"Database error while creating item: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error while creating item: {e}")
+        raise
+    
+def lambda_handler(event, context):
+    try:
+        name, price, description = validate_item_event_body(event)
+
+        logger.info(f"Successfully created item: {name}")
+        return {
+            'statusCode': 201,
+            'body': json.dumps(post_item_to_db(name, price, description), default=json_default)
+        }
+    
+    except ValidationError as e:
+        logger.warning(f'Validation error: {e.message}')
+        return {
+            'statusCode': e.status_code,
+            'body': json.dumps({'error': e.message})
+        }
+    except DatabaseInsertError as e:
+        logger.warning(f'Validation error: {e.message}')
+        return {
+            'statusCode': e.status_code,
+            'body': json.dumps({'error': e.message})
+        }
+    except psycopg2.Error as e:
+        logger.error(f'Database error: {e}', exc_info=True)
         return {
             'statusCode': 500,
             'body': json.dumps({'error': 'Database error'})
         }
-    
-def lambda_handler(event, context):
-    try:
-        validation_result = validate_event_body(event, logger)
-
-        if isinstance(validation_result, dict) and 'statusCode' in validation_result:
-            return validation_result
-        
-        name, price, description = validation_result
-
-        post_item_response = post_item_to_db(name, price, description)
-        if isinstance(post_item_response, dict) and 'statusCode' in post_item_response:
-            return post_item_response
-
-        logger.info(f"Successfully created item: {post_item_response}")
-        return {
-            'statusCode': 201,
-            'body': json.dumps(post_item_response, default=json_default)
-        }
-    
     except Exception as e:
-        logger.error(f'Unhandled exception in lambda_handler: {e}', exc_info=True)
+        logger.error(f'Unhandled exception: {e}', exc_info=True)
         return {
             'statusCode': 500,
             'body': json.dumps({'error': 'Internal server error'})
-        }
+        }    

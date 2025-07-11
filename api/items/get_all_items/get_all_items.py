@@ -1,11 +1,8 @@
-import logging
 import json
 import psycopg2
-from db_connection import get_db_connection
-from json_default import json_default
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+from utils.logger import logger
+from utils.db_connection import get_db_connection
+from utils.json_default import json_default
 
 def get_all_items_from_db():
     try:
@@ -28,39 +25,34 @@ def get_all_items_from_db():
                 items = [dict(zip(columns, row)) for row in rows]
 
                 logger.info(f"Successfully retrieved {len(items)} items")
-                
                 return items
                 
     except psycopg2.Error as e:
-        logger.error(f"Database error: {e}")
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Database error'})
-        }
+        logger.error(f"Database error while fetching all items: {e}")
+        raise
     except Exception as e:
-        logger.error(f"Unexpected error while fetching items: {e}")
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Internal server error'})
-        }
+        logger.error(f"Unexpected error while fetching all: {e}")
+        raise
 
 def lambda_handler(event, context):
     try:
         items = get_all_items_from_db()
-        
-        if isinstance(items, dict) and 'statusCode' in items:
-            return items
-        
-        logger.info(f"Successfully processed request, returning {len(items)} items")
 
+        logger.info(f"Successfully processed request, returning {len(items)} items")
         return {
             'statusCode': 200,
             'body': json.dumps(items, default=json_default)
         }
         
-    except Exception as e:
-        logger.error(f'Unhandled exception in lambda_handler: {e}', exc_info=True)
+    except psycopg2.Error as e:
+        logger.error(f'Database error: {e}')
         return {
             'statusCode': 500,
-            'body': {'error': 'Internal server'}
+            'body': json.dumps({'error': 'Database error'})
+        }
+    except Exception as e:
+        logger.error(f'Unhandled exception: {e}', exc_info=True)
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': 'Internal server error'})
         }

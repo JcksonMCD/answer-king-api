@@ -33,7 +33,7 @@ class TestUpdateCategory(unittest.TestCase):
         body = json.loads(response['body'])
 
         self.assertEqual(response['statusCode'], 404)
-        self.assertEqual(body["error"], "No active Category not found at ID: 1")
+        self.assertEqual(body["error"], "Category with ID 1 not found")
 
     @patch("api.categories.update_category.update_category.get_db_connection")
     def test_lambda_handler_update_category_throws_error_when_db_throws_error(self, mock_get_db_connection):

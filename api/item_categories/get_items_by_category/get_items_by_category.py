@@ -1,33 +1,16 @@
 import json
 import psycopg2
-import logging
-from db_connection import get_db_connection
-from validate_id_path_param import extract_id
-from get_active_row_from_table import get_active_row_from_table
-from json_default import json_default
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-
-def validate_category_exists(cursor, category_id):
-    if not get_active_row_from_table(cursor, table_name='categories', id=category_id):
-        logger.error(f"No Active Category found at ID: {category_id}")
-        return {
-            'statusCode': 400,
-            'body': json.dumps({
-                'error' : f'No Active Category found at ID: {category_id}'
-            })
-        }
-    
-    return None
+from utils.logger import logger
+from utils.db_connection import get_db_connection
+from utils.validation import extract_id_path_param, get_active_row_from_table
+from utils.json_default import json_default
+from utils.custom_exceptions import ValidationError, ActiveResourceNotFoundError
 
 def fetch_items_by_category_from_db(category_id):
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
-                validation_error = validate_category_exists(cursor, category_id)
-                if validation_error:
-                    return validation_error
+                get_active_row_from_table(cursor, table_name='categories', id=category_id)
 
                 cursor.execute(
                     """
@@ -44,41 +27,48 @@ def fetch_items_by_category_from_db(category_id):
                 items = [dict(zip(columns, row)) for row in rows]
 
                 logger.info(f"Successfully fetched {len(items)} items for category {category_id}")
-
-                return {
-                    'statusCode': 200,
-                    'body': json.dumps(items, default=json_default)
-                }
+                return items
             
     except psycopg2.Error as e:
-        logger.error(f"Database error: {e}")
+        logger.error(f"Database error while fetching all items in a category: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error while fetching all items in a category: {e}")
+        raise
+    
+def lambda_handler(event, context):
+    try:
+        category_id = extract_id_path_param(event)
+
+        items = fetch_items_by_category_from_db(category_id)
+
+        return {
+            'statusCode': 200,
+            'body': json.dumps(items, default=json_default)
+        }
+    
+    except ValidationError as e:
+        logger.warning(f'Validation error: {e.message}')
+        return {
+            'statusCode': e.status_code,
+            'body': json.dumps({'error': e.message})
+        }
+    except ActiveResourceNotFoundError as e:
+        logger.warning(f'Resource not found: {e.message}')
+        return {
+            'statusCode': e.status_code,
+            'body': json.dumps({'error': e.message})
+        }
+    except psycopg2.Error as e:
+        logger.error(f'Database error: {e}', exc_info=True)
         return {
             'statusCode': 500,
             'body': json.dumps({'error': 'Database error'})
         }
     except Exception as e:
-        logger.error(f"Unexpected error while updating item: {e}")
+        logger.error(f'Unhandled exception: {e}', exc_info=True)
         return {
             'statusCode': 500,
             'body': json.dumps({'error': 'Internal server error'})
-        }
+        }    
 
-    
-def lambda_handler(event, context):
-    try:
-        category_id_response = extract_id(event, logger)
-        if isinstance(category_id_response, dict) and 'statusCode' in category_id_response:
-            return category_id_response
-
-        category_id = category_id_response
-
-        response = fetch_items_by_category_from_db(category_id)
-
-        return response
-
-    except Exception as e:
-        logger.error(f'Unhandled exception in lambda_handler: {e}', exc_info=True)
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Internal server error'})
-        }

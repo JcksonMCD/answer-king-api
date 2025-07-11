@@ -1,11 +1,8 @@
 import json
-import logging
 import psycopg2
-from db_connection import get_db_connection
-from json_default import json_default
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+from utils.logger import logger
+from utils.db_connection import get_db_connection
+from utils.json_default import json_default
 
 def get_all_categories_from_db():
     try:
@@ -32,24 +29,15 @@ def get_all_categories_from_db():
                 return categories
                 
     except psycopg2.Error as e:
-        logger.error(f"Database error: {e}")
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Database error'})
-        }
+        logger.error(f"Database error while fetching all categories: {e}")
+        raise
     except Exception as e:
         logger.error(f"Unexpected error while fetching all categories: {e}")
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Internal server error'})
-        }
+        raise
 
 def lambda_handler(event, context):
     try:
         categories = get_all_categories_from_db()
-
-        if isinstance(categories, dict) and 'statusCode' in categories:
-            return categories
         
         logger.info(f"Successfully processed request, returning {len(categories)} categories")
 
@@ -58,9 +46,15 @@ def lambda_handler(event, context):
             'body': json.dumps(categories, default=json_default)
         }
         
-    except Exception as e:
-        logger.error(f'Unhandled exception in lambda_handler: {e}', exc_info=True)
+    except psycopg2.Error as e:
+        logger.error(f'Database error: {e}')
         return {
             'statusCode': 500,
-            'body': {'error': 'Internal server'}
+            'body': json.dumps({'error': 'Database error'})
+        }
+    except Exception as e:
+        logger.error(f'Unhandled exception: {e}', exc_info=True)
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': 'Internal server error'})
         }

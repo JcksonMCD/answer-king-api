@@ -1,12 +1,10 @@
-import logging
 import json
 import psycopg2
-from db_connection import get_db_connection
-from validate_categories_request_body import validate_event_body
-from json_default import json_default
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
+from utils.db_connection import get_db_connection
+from utils.validation import validate_category_event_body
+from utils.json_default import json_default
+from utils.custom_exceptions import ValidationError, DatabaseInsertError
+from utils.logger import logger
 
 def post_category_to_db(name):
     try:
@@ -24,11 +22,8 @@ def post_category_to_db(name):
 
                 if not response:
                     logger.error("Failed to insert category - no result returned")
-                    return {
-                        'statusCode': 500,
-                        'body': json.dumps({'error': 'Failed to create category'})
-                    }
-                
+                    raise DatabaseInsertError("Failed to create category", status_code=500)
+
                 colnames = [desc[0] for desc in cursor.description]
                 category = dict(zip(colnames, response))
                 conn.commit()
@@ -36,39 +31,43 @@ def post_category_to_db(name):
                 return category
            
     except psycopg2.Error as e:
-        logger.error(f"Database error: {e}")
+        logger.error(f"Database error while creating category: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error while creating category: {e}")
+        raise
+    
+def lambda_handler(event, context):
+    try:
+        category_name = validate_category_event_body(event)
+        create_category_response = post_category_to_db(category_name)
+        
+        logger.info(f'Create category successful: {create_category_response}')
+        return {
+            'statusCode': 201,
+            'body': json.dumps(create_category_response, default=json_default)
+        }
+
+    except ValidationError as e:
+        logger.warning(f'Validation error: {e.message}')
+        return {
+            'statusCode': e.status_code,
+            'body': json.dumps({'error': e.message})
+        }
+    except DatabaseInsertError as e:
+        logger.warning(f'Database insert error: {e.message}')
+        return {
+            'statusCode': e.status_code,
+            'body': json.dumps({'error': e.message})
+        }
+    except psycopg2.Error as e:
+        logger.error(f'Database error: {e}')
         return {
             'statusCode': 500,
             'body': json.dumps({'error': 'Database error'})
         }
     except Exception as e:
-        logger.error(f"Unexpected error while creating category: {e}")
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Internal server error'})
-        }
-    
-
-def lambda_handler(event, context):
-    try:
-        validation_result = validate_event_body(event, logger)
-        if isinstance(validation_result, dict) and 'statusCode' in validation_result:
-            return validation_result
-        
-        category_name = validation_result
-
-        create_category_response = post_category_to_db(category_name)
-        if isinstance(create_category_response, dict) and 'statusCode' in create_category_response:
-            return create_category_response
-        
-        logger.info(f'Create category successfull: {create_category_response}')
-        return {
-            'statusCode': 201,
-            'body': json.dumps(create_category_response, default=json_default)
-        }
-        
-    except Exception as e:
-        logger.error(f'Unhandled exception in lambda_handler: {e}', exc_info=True)
+        logger.error(f'Unhandled exception: {e}', exc_info=True)
         return {
             'statusCode': 500,
             'body': json.dumps({'error': 'Internal server error'})

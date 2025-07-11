@@ -57,5 +57,5 @@ class TestCreateItem(unittest.TestCase):
         response = lambda_handler(event,None)
         body = json.loads(response['body'])
 
-        self.assertEqual(response['statusCode'], 500)
-        self.assertEqual(body["error"], "Failed to create item")
+        self.assertEqual(response['statusCode'], 400)
+        self.assertEqual(body["error"], "Failed to insert item - no result returned")

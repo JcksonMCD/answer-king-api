@@ -18,60 +18,12 @@ Resources:
     Properties:
       Name: Answer King API
       StageName: Development
-  DBConnectionLayer:
+  UtilsLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: db-connection-layer
-      Description: Shared DB connection code
-      ContentUri: api/lambda_layers/db_connection
-      CompatibleRuntimes:
-        - python3.13
-  JsonDefaultLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: json-default-layer
-      Description: Shared Json parsing code to handle datetime parsing
-      ContentUri: api/lambda_layers/json_default_parser
-      CompatibleRuntimes:
-        - python3.13
-  ValidateItemsRequestBodyLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: validate-items-request-body-layer
-      Description: Validates items request body is accepted
-      ContentUri: api/lambda_layers/validate_items_request_body
-      CompatibleRuntimes:
-        - python3.13
-  ValidateIdPathParamLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: validate-id-path-param-layer
-      Description: Validates id path parameter
-      ContentUri: api/lambda_layers/validate_id_path_param
-      CompatibleRuntimes:
-        - python3.13
-  ValidateCategoriesRequestBodyLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: validate-categories-request-body-layer
-      Description: Validates categories request body is accepted
-      ContentUri: api/lambda_layers/validate_categories_request_body
-      CompatibleRuntimes:
-        - python3.13
-  ValidateItemIdQueryStringParamLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: validate-item-id-query-param-layer
-      Description: Validates item id query string parameter
-      ContentUri: api/lambda_layers/validate_item_id_query_param
-      CompatibleRuntimes:
-        - python3.13
-  GetActiveRowFromTableLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      LayerName: get-active-row-from-table-layer
-      Description: Gets active row from table by id
-      ContentUri: api/lambda_layers/get_active_row_from_table
+      LayerName: utils-layer
+      Description: Shared utils for lambdas
+      ContentUri: api/lambda_layers/utils
       CompatibleRuntimes:
         - python3.13
 
@@ -81,9 +33,7 @@ Resources:
       CodeUri: ./api/items/create_item/
       Handler: create_item.lambda_handler
       Layers:
-        - !Ref DBConnectionLayer
-        - !Ref ValidateItemsRequestBodyLayer
-        - !Ref JsonDefaultLayer
+        - !Ref UtilsLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -112,8 +62,7 @@ Resources:
       CodeUri: ./api/items/remove_item/
       Handler: remove_item.lambda_handler
       Layers:
-        - !Ref DBConnectionLayer
-        - !Ref ValidateIdPathParamLayer
+        - !Ref UtilsLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -142,8 +91,7 @@ Resources:
       CodeUri: ./api/items/get_all_items/
       Handler: get_all_items.lambda_handler
       Layers:
-        - !Ref DBConnectionLayer
-        - !Ref JsonDefaultLayer
+        - !Ref UtilsLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -172,9 +120,7 @@ Resources:
       CodeUri: ./api/items/get_item_by_id/
       Handler: get_item_by_id.lambda_handler
       Layers:
-        - !Ref DBConnectionLayer
-        - !Ref JsonDefaultLayer
-        - !Ref ValidateIdPathParamLayer
+        - !Ref UtilsLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -203,10 +149,7 @@ Resources:
       CodeUri: ./api/items/update_item/
       Handler: update_item.lambda_handler
       Layers:
-        - !Ref DBConnectionLayer
-        - !Ref ValidateItemsRequestBodyLayer
-        - !Ref JsonDefaultLayer
-        - !Ref ValidateIdPathParamLayer
+        - !Ref UtilsLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -235,9 +178,7 @@ Resources:
       CodeUri: ./api/categories/create_category/
       Handler: create_category.lambda_handler
       Layers:
-        - !Ref DBConnectionLayer
-        - !Ref ValidateCategoriesRequestBodyLayer
-        - !Ref JsonDefaultLayer
+        - !Ref UtilsLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -266,8 +207,7 @@ Resources:
       CodeUri: ./api/categories/get_all_categories/
       Handler: get_all_categories.lambda_handler
       Layers:
-        - !Ref DBConnectionLayer
-        - !Ref JsonDefaultLayer
+        - !Ref UtilsLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -296,8 +236,7 @@ Resources:
       CodeUri: ./api/categories/remove_category/
       Handler: remove_category.lambda_handler
       Layers:
-        - !Ref DBConnectionLayer
-        - !Ref ValidateIdPathParamLayer
+        - !Ref UtilsLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -326,10 +265,7 @@ Resources:
       CodeUri: ./api/categories/update_category/
       Handler: update_category.lambda_handler
       Layers:
-        - !Ref DBConnectionLayer
-        - !Ref ValidateIdPathParamLayer
-        - !Ref ValidateCategoriesRequestBodyLayer
-        - !Ref JsonDefaultLayer
+        - !Ref UtilsLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -358,10 +294,7 @@ Resources:
       CodeUri: ./api/item_categories/add_item_to_category/
       Handler: add_item_to_category.lambda_handler
       Layers:
-        - !Ref DBConnectionLayer
-        - !Ref ValidateIdPathParamLayer
-        - !Ref ValidateItemIdQueryStringParamLayer
-        - !Ref GetActiveRowFromTableLayer
+        - !Ref UtilsLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -393,11 +326,7 @@ Resources:
       CodeUri: ./api/item_categories/get_items_by_category/
       Handler: get_items_by_category.lambda_handler
       Layers:
-        - !Ref DBConnectionLayer
-        - !Ref ValidateIdPathParamLayer
-        - !Ref ValidateItemIdQueryStringParamLayer
-        - !Ref GetActiveRowFromTableLayer
-        - !Ref JsonDefaultLayer
+        - !Ref UtilsLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -426,8 +355,7 @@ Resources:
       CodeUri: ./api/orders/create_order/
       Handler: create_order.lambda_handler
       Layers:
-        - !Ref DBConnectionLayer
-        - !Ref JsonDefaultLayer
+        - !Ref UtilsLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
