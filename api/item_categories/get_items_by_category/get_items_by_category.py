@@ -4,6 +4,7 @@ import logging
 from db_connection import get_db_connection
 from validate_id_path_param import extract_id
 from get_active_row_from_table import get_active_row_from_table
+from json_default import json_default
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -46,7 +47,7 @@ def fetch_items_by_category_from_db(category_id):
 
                 return {
                     'statusCode': 200,
-                    'body': json.dumps(items)
+                    'body': json.dumps(items, default=json_default)
                 }
             
     except psycopg2.Error as e:
@@ -61,6 +62,7 @@ def fetch_items_by_category_from_db(category_id):
             'statusCode': 500,
             'body': json.dumps({'error': f'Internal server error'})
         }
+
     
 def lambda_handler(event, context):
     try:

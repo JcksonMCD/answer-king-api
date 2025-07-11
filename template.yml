@@ -392,6 +392,9 @@ Resources:
       Layers:
         - !Ref DBConnectionLayer
         - !Ref ValidateIdPathParamLayer
+        - !Ref ValidateItemIdQueryStringParamLayer
+        - !Ref GetActiveRowFromTableLayer
+        - !Ref JsonDefaultLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
