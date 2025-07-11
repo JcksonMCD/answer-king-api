@@ -1,40 +1,30 @@
-import json
 import unittest
-import logging
-from api.lambda_layers.validate_id_path_param.python.validate_id_path_param import extract_id
+from api.lambda_layers.utils.python.utils.validation import extract_id_path_param
+from api.lambda_layers.utils.python.utils.custom_exceptions import ValidationError
 
-class TestValidateIdPathParam(unittest.TestCase):
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    
+
+class TestExtractIdPathParam(unittest.TestCase):
+
     def test_extract_item_id_returns_id(self):
-        event = {'pathParameters' : {'id' : 1}}
+        event = {'pathParameters': {'id': '1'}}
+        result = extract_id_path_param(event)
+        self.assertEqual(result, 1)
 
-        response = extract_id(event, self.logger)
+    def test_raises_error_with_blank_id(self):
+        event = {'pathParameters': {'id': ''}}
+        with self.assertRaises(ValidationError) as context:
+            extract_id_path_param(event)
+        self.assertIn('Invalid or missing path ID', str(context.exception))
 
-        self.assertEqual(response, 1)
+    def test_raises_error_with_non_integer_id(self):
+        event = {'pathParameters': {'id': 'abc'}}
+        with self.assertRaises(ValidationError) as context:
+            extract_id_path_param(event)
+        self.assertIn('ID must be an integer', str(context.exception))
 
-    def test_extract_item_id_throws_error_with_incorrect_path(self):
-        event = {'pathParameters' : {'id' : ''}}
+    def test_raises_error_with_missing_path_param(self):
+        event = {}
+        with self.assertRaises(ValidationError) as context:
+            extract_id_path_param(event)
+        self.assertIn('Invalid or missing path ID', str(context.exception))
 
-        response = extract_id(event, self.logger)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "Invalid or missing ID in path")
-
-    def test_extract_item_id_throws_error_with_non_numerical_path(self):
-        event = {'pathParameters' : {'id' : 'id'}}
-
-        response = extract_id(event, self.logger)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "ID must be an integer")
-
-    def test_extract_item_id_throws_error_with_missing_path(self):
-        response = extract_id({}, self.logger)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "Invalid or missing ID in path")

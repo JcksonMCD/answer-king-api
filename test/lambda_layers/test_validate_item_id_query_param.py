@@ -1,48 +1,34 @@
-import json
 import unittest
-import logging
-from api.lambda_layers.validate_item_id_query_param.python.validate_item_id_query_param import extract_item_id
+from api.lambda_layers.utils.python.utils.validation import extract_item_id_from_query_param
+from api.lambda_layers.utils.python.utils.custom_exceptions import ValidationError
 
-class TestValidateItemIdQueryParam(unittest.TestCase):
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    
-    def test_extract_id_returns_id(self):
-        event = {'queryStringParameters': {'itemID': 1}}
+class TestExtractItemIdFromQueryParam(unittest.TestCase):
 
-        response = extract_item_id(event, self.logger)
+    def test_extract_id_returns_integer_id(self):
+        event = {'queryStringParameters': {'itemID': '1'}}
+        result = extract_item_id_from_query_param(event)
+        self.assertEqual(result, 1)
 
-        self.assertEqual(response, 1)
+    def test_raises_error_with_missing_itemID_key(self):
+        event = {'queryStringParameters': {'id': '1'}}
+        with self.assertRaises(ValidationError) as context:
+            extract_item_id_from_query_param(event)
+        self.assertIn('Invalid or missing ID in path', str(context.exception))
 
-    def test_extract_id_throws_error_with_incorrect_path(self):
-        event = {'queryStringParameters': {'id': 1}}
-
-        response = extract_item_id(event, self.logger)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "Invalid or missing ID in path. Must use query string parameter labeled itemID")
-
-    def test_extract_id_throws_error_with_non_numerical_path(self):
+    def test_raises_error_with_non_integer_value(self):
         event = {'queryStringParameters': {'itemID': 'itemID'}}
+        with self.assertRaises(ValidationError) as context:
+            extract_item_id_from_query_param(event)
+        self.assertIn('ID must be an integer', str(context.exception))
 
-        response = extract_item_id(event, self.logger)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "ID must be an integer")
-
-    def test_extract_id_throws_error_with_null_id(self):
+    def test_raises_error_with_null_itemID(self):
         event = {'queryStringParameters': {'itemID': None}}
-        response = extract_item_id(event, self.logger)
-        body = json.loads(response['body'])
+        with self.assertRaises(ValidationError) as context:
+            extract_item_id_from_query_param(event)
+        self.assertIn('Invalid or missing ID in path', str(context.exception))
 
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "Invalid or missing ID in path. Must use query string parameter labeled itemID")
-
-    def test_extract_id_throws_error_with_missing_path(self):
-        response = extract_item_id({}, self.logger)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "Invalid or missing ID in path. Must use query string parameter labeled itemID")
+    def test_raises_error_with_missing_query_parameters(self):
+        event = {}
+        with self.assertRaises(ValidationError) as context:
+            extract_item_id_from_query_param(event)
+        self.assertIn('Invalid or missing ID in path', str(context.exception))

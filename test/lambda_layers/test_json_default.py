@@ -1,6 +1,6 @@
 import datetime
 import unittest
-from api.lambda_layers.json_default_parser.python.json_default import json_default
+from api.lambda_layers.utils.python.utils.json_default import json_default
 
 class TestJsonDefault(unittest.TestCase):
     
