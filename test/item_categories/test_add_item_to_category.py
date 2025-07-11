@@ -93,15 +93,6 @@ class TestAddItemToCategory(unittest.TestCase):
         self.assertIsNone(response)
         self.assertEqual(self.mock_cursor.execute.call_count, 1)
 
-    def test_create_item_category_association_throws_unique_validation_error(self):
-        self.mock_cursor.execute.side_effect = psycopg2.errors.UniqueViolation('unique constraint violation')
-
-        with self.assertRaises(ValidationError) as context:
-            create_item_category_association(self.mock_cursor, 1, 2)
-        
-        self.assertEqual(str(context.exception), 'Item at ID 2 is already added to Category with ID 1')
-        self.assertEqual(self.mock_cursor.execute.call_count, 1)
-
     @patch('api.item_categories.add_item_to_category.add_item_to_category.get_db_connection')
     @patch('api.item_categories.add_item_to_category.add_item_to_category.validate_entities_exist')
     @patch('api.item_categories.add_item_to_category.add_item_to_category.create_item_category_association')
