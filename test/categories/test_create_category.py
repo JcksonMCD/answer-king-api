@@ -15,7 +15,7 @@ class TestCreateCategory(unittest.TestCase):
     @patch("api.categories.create_category.create_category.get_db_connection")
     def test_lambda_handler_creates_expected_category(self, mock_get_db_connection):
         setup_mock_db(mock_get_db_connection, 
-                           fetchone=(1, datetime.datetime(2025, 7, 2, 12, 0, 0)),
+                           fetchone=(1, 'Created', datetime.datetime(2025, 7, 2, 12, 0, 0)),
                            description=self.mock_description)
 
         event = {'body' : json.dumps({'name' : 'Created'})}
@@ -25,31 +25,6 @@ class TestCreateCategory(unittest.TestCase):
 
         self.assertEqual(response['statusCode'], 201)
         self.assertEqual(json.loads(response['body']), expectedResponseBody)
-
-    def test_lambda_handler_create_category_throws_error_with_incorrect_body(self):
-        event = {'body' : json.dumps({'' : 'Created'})}
-
-        response = lambda_handler(event,None)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "Invalid request data")
-
-    def test_lambda_handler_create_category_throws_error_with_body_as_string(self):
-        event = {'body' : 'name : Created'}
-
-        response = lambda_handler(event,None)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "Invalid request data")
-
-    def test_lambda_handler_create_category_throws_error_with_missing_body(self):
-        response = lambda_handler({},None)
-        body = json.loads(response['body'])
-
-        self.assertEqual(response['statusCode'], 400)
-        self.assertEqual(body["error"], "Invalid request data")
 
     @patch("api.categories.create_category.create_category.get_db_connection")
     def test_lambda_handler_create_category_throws_error_when_db_has_error(self, mock_get_db_connection):
@@ -62,3 +37,15 @@ class TestCreateCategory(unittest.TestCase):
 
         self.assertEqual(response['statusCode'], 500)
         self.assertEqual(body["error"], "Database error")
+
+    @patch("api.categories.create_category.create_category.get_db_connection")
+    def test_lambda_handler_create_category_throws_error_when_db_has_exception(self, mock_get_db_connection):
+        setup_mock_db(mock_get_db_connection, side_effect=Exception)
+
+        event = {'body' : json.dumps({'name' : 'Created'})}
+
+        response = lambda_handler(event,None)
+        body = json.loads(response['body'])
+
+        self.assertEqual(response['statusCode'], 500)
+        self.assertEqual(body["error"], "Internal server error")

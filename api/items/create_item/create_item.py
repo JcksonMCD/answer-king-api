@@ -1,24 +1,12 @@
-import os
 import json
 import psycopg2
-from db_connection import get_db_connection
+from utils.logger import logger
+from utils.db_connection import get_db_connection
+from utils.validation import validate_item_event_body
+from utils.json_default import json_default
+from utils.custom_exceptions import ValidationError, DatabaseInsertError
 
-def lambda_handler(event, context):
-    # Parse and validate request
-    try:
-        body = json.loads(event['body'])
-        name = body.get('name')
-        if not name: 
-            raise KeyError('Name field missing')
-        price = float(body['price'])  # Validate numeric type
-        description = body.get('description')
-    except (KeyError, json.JSONDecodeError, ValueError) as e:
-        return {
-            'statusCode': 400,
-            'body': json.dumps({'error': 'Invalid request data'})
-        }
-
-    # Database operation
+def post_item_to_db(name, price, description):
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
@@ -26,26 +14,61 @@ def lambda_handler(event, context):
                     """
                     INSERT INTO items (name, price, description)
                     VALUES (%s, %s, %s)
-                    RETURNING id, created_at
+                    RETURNING id, name, price, description, created_at
                     """,
                     (name, price, description))
                 
-                item_id, created_at = cursor.fetchone()
-        
-        # Format response
+                response = cursor.fetchone()
+
+                if not response:
+                    logger.error("Failed to insert item - no result returned")
+                    raise DatabaseInsertError("Failed to insert item - no result returned")
+                
+                colnames = [desc[0] for desc in cursor.description]
+                item = dict(zip(colnames, response))
+                conn.commit()
+
+                logger.info(f"Successfully created item: {name}")
+                return item
+                
+    except psycopg2.Error as e:
+        logger.error(f"Database error while creating item: {e}")
+        raise
+    except Exception as e:
+        logger.error(f"Unexpected error while creating item: {e}")
+        raise
+    
+def lambda_handler(event, context):
+    try:
+        name, price, description = validate_item_event_body(event)
+
+        logger.info(f"Successfully created item: {name}")
         return {
             'statusCode': 201,
-            'body': json.dumps({
-                'id': item_id,
-                'name': name,
-                'price': price,
-                'description': description,
-                'created_at': created_at.isoformat()
-            })
+            'body': json.dumps(post_item_to_db(name, price, description), default=json_default)
         }
-        
+    
+    except ValidationError as e:
+        logger.warning(f'Validation error: {e.message}')
+        return {
+            'statusCode': e.status_code,
+            'body': json.dumps({'error': e.message})
+        }
+    except DatabaseInsertError as e:
+        logger.warning(f'Validation error: {e.message}')
+        return {
+            'statusCode': e.status_code,
+            'body': json.dumps({'error': e.message})
+        }
     except psycopg2.Error as e:
+        logger.error(f'Database error: {e}', exc_info=True)
         return {
             'statusCode': 500,
             'body': json.dumps({'error': 'Database error'})
         }
+    except Exception as e:
+        logger.error(f'Unhandled exception: {e}', exc_info=True)
+        return {
+            'statusCode': 500,
+            'body': json.dumps({'error': 'Internal server error'})
+        }    

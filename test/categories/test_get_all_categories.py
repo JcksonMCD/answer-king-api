@@ -2,7 +2,7 @@ import unittest
 import psycopg2
 from unittest.mock import MagicMock, patch
 import json
-from api.categories.get_all_categories.get_all_categories import lambda_handler, json_default
+from api.categories.get_all_categories.get_all_categories import lambda_handler
 from test.helper_funcs.setup_mock_db import setup_mock_db
 import datetime
 
@@ -50,18 +50,7 @@ class TestGetAllCategories(unittest.TestCase):
         setup_mock_db(mock_get_db_connection, side_effect=psycopg2.Error)
 
         response = lambda_handler({},None)
+        body = json.loads(response['body'])
 
         self.assertEqual(response['statusCode'], 500)
-        self.assertIn('Database error', response['body'])
-
-    def test_default_json_handles_datetime(self):
-        dateObj = datetime.datetime(2025, 7, 2)
-        self.assertEqual(dateObj.isoformat(), json_default(dateObj))
-
-    def test_default_json_handles_string(self):
-        stringObj = "String Object"
-        self.assertEqual("String Object", json_default(stringObj))
-
-    def test_default_json_handles_float(self):
-        floatObj = 1.99
-        self.assertEqual("1.99", json_default(floatObj))
+        self.assertEqual(body, {'error': 'Database error'})
