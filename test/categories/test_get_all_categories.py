@@ -50,6 +50,7 @@ class TestGetAllCategories(unittest.TestCase):
         setup_mock_db(mock_get_db_connection, side_effect=psycopg2.Error)
 
         response = lambda_handler({},None)
+        body = json.loads(response['body'])
 
         self.assertEqual(response['statusCode'], 500)
-        self.assertEqual(response['body'], {'error': 'Database error occured'})
+        self.assertEqual(body, {'error': 'Database error'})

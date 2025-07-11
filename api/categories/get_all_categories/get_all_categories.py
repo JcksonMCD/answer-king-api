@@ -47,6 +47,9 @@ def get_all_categories_from_db():
 def lambda_handler(event, context):
     try:
         categories = get_all_categories_from_db()
+
+        if isinstance(categories, dict) and 'statusCode' in categories:
+            return categories
         
         logger.info(f"Successfully processed request, returning {len(categories)} categories")
 

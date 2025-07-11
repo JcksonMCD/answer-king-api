@@ -48,6 +48,9 @@ def lambda_handler(event, context):
     try:
         items = get_all_items_from_db()
         
+        if isinstance(items, dict) and 'statusCode' in items:
+            return items
+        
         logger.info(f"Successfully processed request, returning {len(items)} items")
 
         return {

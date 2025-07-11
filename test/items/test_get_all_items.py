@@ -55,18 +55,20 @@ class TestGetAllItems(unittest.TestCase):
         setup_mock_db(mock_get_db_connection, side_effect = psycopg2.Error('DB Error'))
 
         response = lambda_handler({},None)
+        body = json.loads(response['body'])
 
         self.assertEqual(response['statusCode'], 500)
-        self.assertEqual(response['body'], {'error': 'Database error occured'})
+        self.assertEqual(body, {'error': 'Database error'})
 
     @patch("api.items.get_all_items.get_all_items.get_db_connection")
     def test_lambda_handler_throws_database_exception(self, mock_get_db_connection):
         setup_mock_db(mock_get_db_connection, side_effect = Exception)
 
         response = lambda_handler({},None)
+        body = json.loads(response['body'])
 
         self.assertEqual(response['statusCode'], 500)
-        self.assertEqual(response['body'], {'error': 'Database error occured'})
+        self.assertEqual(body, {'error': 'Internal server error'})
 
     def test_default_json_handles_datetime(self):
         dateObj = datetime.datetime(2025, 7, 2)
