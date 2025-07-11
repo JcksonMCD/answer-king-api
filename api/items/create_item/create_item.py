@@ -3,6 +3,7 @@ import json
 import psycopg2
 from db_connection import get_db_connection
 from validate_items_request_body import validate_event_body
+from json_default import json_default
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -19,17 +20,20 @@ def post_item_to_db(name, price, description):
                     """,
                     (name, price, description))
                 
-                result = cursor.fetchone()
-                conn.commit()
+                response = cursor.fetchone()
 
-                if not result:
+                if not response:
                     logger.error("Failed to insert item - no result returned")
                     return {
                         'statusCode': 500,
                         'body': json.dumps({'error': 'Failed to create item'})
                     }
                 
-        return result
+                colnames = [desc[0] for desc in cursor.description]
+                item = dict(zip(colnames, response))
+                conn.commit()
+
+        return item
                 
     except psycopg2.Error as e:
         logger.error(f"Database error: {e}")
@@ -47,22 +51,14 @@ def lambda_handler(event, context):
         
         name, price, description = validation_result
 
-        db_result = post_item_to_db(name, price, description)
-        if isinstance(db_result, dict) and 'statusCode' in db_result:
-            return db_result
+        post_item_response = post_item_to_db(name, price, description)
+        if isinstance(post_item_response, dict) and 'statusCode' in post_item_response:
+            return post_item_response
 
-        item_id, created_at = db_result
-        logger.info(f"Successfully created item with ID: {item_id}")
-
+        logger.info(f"Successfully created item: {post_item_response}")
         return {
             'statusCode': 201,
-            'body': json.dumps({
-                'id': item_id,
-                'name': name,
-                'price': price,
-                'description': description,
-                'created_at': created_at.isoformat()
-            })
+            'body': json.dumps(post_item_response, default=json_default)
         }
     
     except Exception as e:

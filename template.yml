@@ -83,6 +83,7 @@ Resources:
       Layers:
         - !Ref DBConnectionLayer
         - !Ref ValidateItemsRequestBodyLayer
+        - !Ref JsonDefaultLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -236,6 +237,7 @@ Resources:
       Layers:
         - !Ref DBConnectionLayer
         - !Ref ValidateCategoriesRequestBodyLayer
+        - !Ref JsonDefaultLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -327,6 +329,7 @@ Resources:
         - !Ref DBConnectionLayer
         - !Ref ValidateIdPathParamLayer
         - !Ref ValidateCategoriesRequestBodyLayer
+        - !Ref JsonDefaultLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:

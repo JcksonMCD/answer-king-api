@@ -3,6 +3,7 @@ import json
 import psycopg2
 from db_connection import get_db_connection
 from validate_categories_request_body import validate_event_body
+from json_default import json_default
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -19,17 +20,20 @@ def post_category_to_db(name):
                     """,
                     (name,))
                 
-                result = cursor.fetchone()
-                conn.commit()
+                response = cursor.fetchone()
 
-                if not result:
+                if not response:
                     logger.error("Failed to insert category - no result returned")
                     return {
                         'statusCode': 500,
                         'body': json.dumps({'error': 'Failed to create category'})
                     }
                 
-                return result
+                colnames = [desc[0] for desc in cursor.description]
+                category = dict(zip(colnames, response))
+                conn.commit()
+                
+                return category
                 
     except psycopg2.Error as e:
         logger.error(f"Database error: {e}")
@@ -57,15 +61,10 @@ def lambda_handler(event, context):
         if isinstance(create_category_response, dict) and 'statusCode' in create_category_response:
             return create_category_response
         
-        category_id, created_at = create_category_response
-        
+        logger.info(f'Create category successfull: {create_category_response}')
         return {
             'statusCode': 201,
-            'body': json.dumps({
-                'id': category_id,
-                'name': category_name,
-                'created_at': created_at.isoformat()
-            })
+            'body': json.dumps(create_category_response, default=json_default)
         }
         
     except Exception as e:
