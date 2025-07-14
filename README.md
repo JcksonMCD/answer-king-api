@@ -9,5 +9,4 @@
 - Set up a GitHub Actions pipeline for automatic deployment.
 - Improve unit test coverage after Friday's refactor.
 - Remove IP access restriction to my local machine for security and portability.
-- Add authentication for API calls.
 
