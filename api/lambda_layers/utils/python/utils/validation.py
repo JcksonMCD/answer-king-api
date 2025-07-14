@@ -1,5 +1,5 @@
 import json
-import pydantic
+from pydantic import ValidationError as PydanticValidationError
 from .logger import logger
 from .custom_exceptions import ValidationError, ActiveResourceNotFoundError
 from .models import Category, Item
@@ -15,7 +15,7 @@ def validate_category_event_body(event):
 
     try:
         return Category.model_validate(body)
-    except pydantic.ValidationError as e:
+    except PydanticValidationError as e:
         raise ValidationError(e.errors()[0]['msg'])
 
 def validate_item_event_body(event):
@@ -30,7 +30,7 @@ def validate_item_event_body(event):
 
     try:
         return Item.model_validate(body)
-    except pydantic.ValidationError as e:
+    except PydanticValidationError as e:
         error_messages = "; ".join(err["msg"] for err in e.errors())
         raise ValidationError(error_messages)
     
