@@ -12,3 +12,4 @@
 - General refactor focusing on code readability and in particular utilising consistent, descriptive naming conventions.
 - Add authentication for API calls.
 - Add validation to ensure no categories or items that are being added to the database are duplicates (name fields are unique).
+- Do an actual project README.
