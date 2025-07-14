@@ -10,4 +10,4 @@
 - Improve unit test coverage after Friday's refactor.
 - Remove IP access restriction to my local machine for security and portability.
 - General refactor focusing on code readability and in particular utilising consistent, descriptive naming conventions.
-
+- Add authentication for API calls.
