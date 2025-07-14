@@ -3,6 +3,7 @@ import psycopg2
 from utils.logger import logger
 from utils.db_connection import get_db_connection
 from utils.json_default import json_default
+from utils.lambda_exception_handler_wrapper import lambda_exception_handler_wrapper
 
 def get_all_categories_from_db():
     try:
@@ -35,26 +36,13 @@ def get_all_categories_from_db():
         logger.error(f"Unexpected error while fetching all categories: {e}")
         raise
 
+@lambda_exception_handler_wrapper
 def lambda_handler(event, context):
-    try:
-        categories = get_all_categories_from_db()
-        
-        logger.info(f"Successfully processed request, returning {len(categories)} categories")
+    categories = get_all_categories_from_db()
+    
+    logger.info(f"Successfully processed request, returning {len(categories)} categories")
 
-        return {
-            'statusCode': 200,
-            'body': json.dumps(categories, default=json_default)
-        }
-        
-    except psycopg2.Error as e:
-        logger.error(f'Database error: {e}')
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Database error'})
-        }
-    except Exception as e:
-        logger.error(f'Unhandled exception: {e}', exc_info=True)
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Internal server error'})
-        }
+    return {
+        'statusCode': 200,
+        'body': json.dumps(categories, default=json_default)
+    }

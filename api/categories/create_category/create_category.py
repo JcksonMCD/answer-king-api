@@ -3,7 +3,7 @@ import psycopg2
 from utils.db_connection import get_db_connection
 from utils.validation import validate_category_event_body
 from utils.json_default import json_default
-from utils.custom_exceptions import ValidationError, DatabaseInsertError
+from utils.custom_exceptions import DatabaseInsertError
 from utils.logger import logger
 from utils.lambda_exception_handler_wrapper import lambda_exception_handler_wrapper
 
