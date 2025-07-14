@@ -1,26 +1,24 @@
 import json
+import pydantic
 from .logger import logger
 from .custom_exceptions import ValidationError, ActiveResourceNotFoundError
+from .models import Category
 
 def validate_category_event_body(event):
     if not event.get('body'):
         raise ValidationError('Request body is required')
-    
+
     try:
         body = json.loads(event['body'])
     except json.JSONDecodeError as e:
-        logger.warning(f"Invalid JSON in request body: {e}")
         raise ValidationError('Invalid JSON format')
-    
-    name = body.get('name')
-    if not name or not isinstance(name, str): 
-        raise ValidationError('Name field is required and must be of type string')
-    
-    name = name.strip()
-    if not name:
-        raise ValidationError('Name field must not be empty')
 
-    return name
+    try:
+        category = Category.model_validate(body)
+    except pydantic.ValidationError as e:
+        raise ValidationError(e.errors()[0]['msg'])
+
+    return category
 
 def validate_item_event_body(event):
     if not event.get('body'):

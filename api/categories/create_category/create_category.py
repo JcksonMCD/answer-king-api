@@ -7,7 +7,7 @@ from utils.custom_exceptions import DatabaseInsertError
 from utils.logger import logger
 from utils.lambda_exception_handler_wrapper import lambda_exception_handler_wrapper
 
-def post_category_to_db(name):
+def post_category_to_db(category):
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
@@ -17,7 +17,7 @@ def post_category_to_db(name):
                     VALUES (%s)
                     RETURNING id, name, created_at;
                     """,
-                    (name,))
+                    (category.name,))
                 
                 response = cursor.fetchone()
 
@@ -25,11 +25,10 @@ def post_category_to_db(name):
                     logger.error("Failed to insert category - no result returned")
                     raise DatabaseInsertError("Failed to create category", status_code=500)
 
-                colnames = [desc[0] for desc in cursor.description]
-                category = dict(zip(colnames, response))
-                conn.commit()
+                columns = [desc[0] for desc in cursor.description]
+                category_data = dict(zip(columns, response))
                 
-                return category
+                return category_data
            
     except psycopg2.Error as e:
         logger.error(f"Database error while creating category: {e}")
@@ -40,11 +39,11 @@ def post_category_to_db(name):
 
 @lambda_exception_handler_wrapper    
 def lambda_handler(event, context):
-    category_name = validate_category_event_body(event)
-    create_category_response = post_category_to_db(category_name)
+    category = validate_category_event_body(event)
+    category_data = post_category_to_db(category)
     
-    logger.info(f'Create category successful: {create_category_response}')
+    logger.info(f'Create category successful: {category_data}')
     return {
         'statusCode': 201,
-        'body': json.dumps(create_category_response, default=json_default)
+        'body': json.dumps(category_data, default=json_default)
     }

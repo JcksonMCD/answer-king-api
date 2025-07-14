@@ -30,10 +30,10 @@ Resources:
   CreateItemFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/items/create_item/
+      CodeUri: ./api/items/create-item/
       Handler: create_item.lambda_handler
       Layers:
-        - !Ref UtilsLayer
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -59,10 +59,10 @@ Resources:
   DeleteItemFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/items/remove_item/
+      CodeUri: ./api/items/remove-item/
       Handler: remove_item.lambda_handler
       Layers:
-        - !Ref UtilsLayer
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -88,10 +88,10 @@ Resources:
   GetAllItemsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/items/get_all_items/
+      CodeUri: ./api/items/get-all-items/
       Handler: get_all_items.lambda_handler
       Layers:
-        - !Ref UtilsLayer
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -117,10 +117,10 @@ Resources:
   GetItemByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/items/get_item_by_id/
+      CodeUri: ./api/items/get-item-by-id/
       Handler: get_item_by_id.lambda_handler
       Layers:
-        - !Ref UtilsLayer
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -146,10 +146,10 @@ Resources:
   UpdateItemByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/items/update_item/
+      CodeUri: ./api/items/update-item/
       Handler: update_item.lambda_handler
       Layers:
-        - !Ref UtilsLayer
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -175,10 +175,10 @@ Resources:
   CreateCategoryFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/categories/create_category/
+      CodeUri: ./api/categories/create-category/
       Handler: create_category.lambda_handler
       Layers:
-        - !Ref UtilsLayer
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -204,10 +204,10 @@ Resources:
   GetAllCategoriesFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/categories/get_all_categories/
+      CodeUri: ./api/categories/get-all-categories/
       Handler: get_all_categories.lambda_handler
       Layers:
-        - !Ref UtilsLayer
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -233,10 +233,10 @@ Resources:
   DeleteCategoryByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/categories/remove_category/
+      CodeUri: ./api/categories/remove-category/
       Handler: remove_category.lambda_handler
       Layers:
-        - !Ref UtilsLayer
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -262,10 +262,10 @@ Resources:
   UpdateCategoryByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/categories/update_category/
+      CodeUri: ./api/categories/update-category/
       Handler: update_category.lambda_handler
       Layers:
-        - !Ref UtilsLayer
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -291,10 +291,10 @@ Resources:
   AddItemToCategoryFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/item_categories/add_item_to_category/
+      CodeUri: ./api/item-categories/add-item-to-category/
       Handler: add_item_to_category.lambda_handler
       Layers:
-        - !Ref UtilsLayer
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -323,10 +323,10 @@ Resources:
   GetAllItemsByCategoryFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/item_categories/get_items_by_category/
+      CodeUri: ./api/item-categories/get-items-by-category/
       Handler: get_items_by_category.lambda_handler
       Layers:
-        - !Ref UtilsLayer
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
@@ -352,10 +352,10 @@ Resources:
   CreateOrderFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./api/orders/create_order/
+      CodeUri: ./api/orders/create-order/
       Handler: create_order.lambda_handler
       Layers:
-        - !Ref UtilsLayer
+        - !Ref DBConnectionLayer
       Runtime: python3.13
       Timeout: 10
       VpcConfig:
