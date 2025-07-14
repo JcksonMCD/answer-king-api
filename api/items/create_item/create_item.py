@@ -4,7 +4,8 @@ from utils.logger import logger
 from utils.db_connection import get_db_connection
 from utils.validation import validate_item_event_body
 from utils.json_default import json_default
-from utils.custom_exceptions import ValidationError, DatabaseInsertError
+from utils.custom_exceptions import DatabaseInsertError
+from utils.lambda_exception_handler_wrapper import lambda_exception_handler_wrapper
 
 def post_item_to_db(name, price, description):
     try:
@@ -37,38 +38,13 @@ def post_item_to_db(name, price, description):
     except Exception as e:
         logger.error(f"Unexpected error while creating item: {e}")
         raise
-    
-def lambda_handler(event, context):
-    try:
-        name, price, description = validate_item_event_body(event)
 
-        logger.info(f"Successfully created item: {name}")
-        return {
-            'statusCode': 201,
-            'body': json.dumps(post_item_to_db(name, price, description), default=json_default)
-        }
-    
-    except ValidationError as e:
-        logger.warning(f'Validation error: {e.message}')
-        return {
-            'statusCode': e.status_code,
-            'body': json.dumps({'error': e.message})
-        }
-    except DatabaseInsertError as e:
-        logger.warning(f'Validation error: {e.message}')
-        return {
-            'statusCode': e.status_code,
-            'body': json.dumps({'error': e.message})
-        }
-    except psycopg2.Error as e:
-        logger.error(f'Database error: {e}', exc_info=True)
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Database error'})
-        }
-    except Exception as e:
-        logger.error(f'Unhandled exception: {e}', exc_info=True)
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Internal server error'})
-        }    
+@lambda_exception_handler_wrapper   
+def lambda_handler(event, context):
+    name, price, description = validate_item_event_body(event)
+
+    logger.info(f"Successfully created item: {name}")
+    return {
+        'statusCode': 201,
+        'body': json.dumps(post_item_to_db(name, price, description), default=json_default)
+    } 
