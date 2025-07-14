@@ -1,9 +1,9 @@
-import json
 import psycopg2
 from utils.logger import logger
 from utils.db_connection import get_db_connection
 from utils.validation import extract_id_path_param
-from utils.custom_exceptions import ResourceNotFoundError, ValidationError
+from utils.custom_exceptions import ResourceNotFoundError
+from utils.lambda_exception_handler_wrapper import lambda_exception_handler_wrapper
 
 def delete_category_from_db(category_id):
     try:
@@ -37,39 +37,14 @@ def delete_category_from_db(category_id):
         logger.error(f"Unexpected error while deleting category: {e}")
         raise
 
+@lambda_exception_handler_wrapper
 def lambda_handler(event, context):
-    try:
-        category_id = extract_id_path_param(event)
-        
-        deleted = delete_category_from_db(category_id)
+    category_id = extract_id_path_param(event)
+    
+    deleted = delete_category_from_db(category_id)
 
-        logger.info(f'Category successfully deleted at ID: {deleted}')
-        return {
-            'statusCode': 204,
-            'body': ''
-        }
-
-    except ValidationError as e:
-        logger.warning(f'Validation error: {e.message}')
-        return {
-            'statusCode': e.status_code,
-            'body': json.dumps({'error': e.message})
-        }
-    except ResourceNotFoundError as e:
-        logger.warning(f'Database insert error: {e.message}')
-        return {
-            'statusCode': e.status_code,
-            'body': json.dumps({'error': e.message})
-        }
-    except psycopg2.Error as e:
-        logger.error(f'Database error: {e}')
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Database error'})
-        }
-    except Exception as e:
-        logger.error(f'Unhandled exception: {e}', exc_info=True)
-        return {
-            'statusCode': 500,
-            'body': json.dumps({'error': 'Internal server error'})
-        }
+    logger.info(f'Category successfully deleted at ID: {deleted}')
+    return {
+        'statusCode': 204,
+        'body': ''
+    }
