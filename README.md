@@ -13,3 +13,5 @@
 - Add authentication for API calls.
 - Add validation to ensure no categories or items that are being added to the database are duplicates (name fields are unique).
 - Do an actual project README.
+- Look into using pydantic/ classes for table objects
+- Abstract out formatting of row/s to a method with in utils layer
