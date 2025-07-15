@@ -5,21 +5,16 @@ import json
 import datetime
 from api.orders.create_order.create_order import lambda_handler, post_order_to_db
 from test.helper_funcs.setup_mock_db import setup_mock_db
-from utils.custom_exceptions import DatabaseInsertError
+from api.lambda_layers.utils.python.utils.custom_exceptions import DatabaseInsertError
 
 
 class TestCreateOrder(unittest.TestCase):
-    def setUp(self):
-        self.mock_description = [
-            ("id",), ("status",), ("total",), ("created_at",)
-        ]
 
     @patch("api.orders.create_order.create_order.get_db_connection")
     def test_lambda_handler_creates_expected_order(self, mock_get_db_connection):
         setup_mock_db(
             mock_get_db_connection,
-            fetchone=(1, 'pending', 0, datetime.datetime(2025, 7, 2, 12, 0, 0)),
-            description=self.mock_description
+            fetchone={'id': 1, 'status': 'pending', 'total': 0, 'created_at': '2025-07-02T12:00:00'},
         )
 
         expected = {'id': 1, 'status': 'pending', 'total': 0, 'created_at': '2025-07-02T12:00:00'}
@@ -33,8 +28,7 @@ class TestCreateOrder(unittest.TestCase):
     def test_lambda_handler_ignores_event_body(self, mock_get_db_connection):
         setup_mock_db(
             mock_get_db_connection,
-            fetchone=(1, 'pending', 0, datetime.datetime(2025, 7, 2, 12, 0, 0)),
-            description=self.mock_description
+            fetchone={'id': 1, 'status': 'pending', 'total': 0, 'created_at': '2025-07-02T12:00:00'},
         )
 
         event = {'body': json.dumps({'total': 100})}
@@ -79,8 +73,12 @@ class TestCreateOrder(unittest.TestCase):
     def test_lambda_handler_handles_different_data_types(self, mock_get_db_connection):
         setup_mock_db(
             mock_get_db_connection,
-            fetchone=(999, 'completed', 25.50, datetime.datetime(2025, 12, 31, 23, 59, 59)),
-            description=self.mock_description
+            fetchone={
+            'id': 999,
+            'status': 'completed',
+            'total': 25.50,
+            'created_at': '2025-12-31T23:59:59'
+        },
         )
 
         expected = {
