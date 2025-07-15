@@ -7,15 +7,11 @@ from api.item_categories.get_items_by_category.get_items_by_category import fetc
 from api.lambda_layers.utils.python.utils.custom_exceptions import ValidationError, ActiveResourceNotFoundError
 
 class TestGetItemsByCategory(unittest.TestCase):
-    def setUp(self):
-        self.mock_description = [("id",), ("name",), ("price",)]
 
     @patch('api.item_categories.get_items_by_category.get_items_by_category.get_db_connection')
     @patch('api.item_categories.get_items_by_category.get_items_by_category.get_active_row_from_table')
     def test_fetch_items_by_category_in_db_returns_success_json(self, mock_get_active_row, mock_get_db_connection):
-        setup_mock_db(mock_get_db_connection, fetchall=[
-            (1, "Test Item", 1.99)
-        ], description=self.mock_description)
+        setup_mock_db(mock_get_db_connection, fetchall=[{'id': 1, 'name': 'Test Item', 'price': 1.99}])
 
         mock_get_active_row.return_value = None
 
@@ -27,7 +23,7 @@ class TestGetItemsByCategory(unittest.TestCase):
     @patch('api.item_categories.get_items_by_category.get_items_by_category.get_db_connection')
     @patch('api.item_categories.get_items_by_category.get_items_by_category.get_active_row_from_table')
     def test_fetch_items_by_category_returns_empty_list(self, mock_get_active_row, mock_get_db_connection):
-        setup_mock_db(mock_get_db_connection, fetchall=[], description=self.mock_description)
+        setup_mock_db(mock_get_db_connection, fetchall=[])
         mock_get_active_row.return_value = None
 
         result = fetch_items_by_category_from_db(1)

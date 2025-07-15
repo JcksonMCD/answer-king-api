@@ -6,14 +6,10 @@ from api.items.update_item.update_item import lambda_handler
 from test.helper_funcs.setup_mock_db import setup_mock_db
 
 class TestUpdateItem(unittest.TestCase):
-    def setUp(self):
-        self.mock_description = [
-            ("id",), ("name",), ("price",), ("description",), ("created_at",)
-        ]
 
     @patch("api.items.update_item.update_item.get_db_connection")
     def test_lambda_handler_updates_expected_item(self, mock_get_db_connection):
-        setup_mock_db(mock_get_db_connection, fetchone=(1, "Updated Item", 1.99, "Test Item Description"), description=self.mock_description)
+        setup_mock_db(mock_get_db_connection, fetchone={'id': 1, 'name' : 'Updated Item', 'price': 1.99, 'description': 'Test Item Description'})
 
         event = {'pathParameters' : {'id' : '1'}, 'body' : json.dumps({'name' : 'Updated Item', 'price': 1.99, 'description': 'Test Item Description'})}
         expectedResponseBody = {'id': 1, 'name' : 'Updated Item', 'price': 1.99, 'description': 'Test Item Description'}
@@ -25,7 +21,7 @@ class TestUpdateItem(unittest.TestCase):
 
     @patch("api.items.update_item.update_item.get_db_connection")
     def test_lambda_handler_updates_expected_item_with_missing_description(self, mock_get_db_connection):
-        setup_mock_db(mock_get_db_connection, fetchone=(1, "Updated Item", 1.99), description=self.mock_description)
+        setup_mock_db(mock_get_db_connection, fetchone={'id': 1, 'name' : 'Updated Item', 'price': 1.99})
 
         event = {'pathParameters' : {'id' : '1'}, 'body' : json.dumps({'name' : 'Updated Item', 'price': 1.99})}
         expectedResponseBody = {'id': 1, 'name' : 'Updated Item', 'price': 1.99}
@@ -37,7 +33,7 @@ class TestUpdateItem(unittest.TestCase):
 
     @patch("api.items.update_item.update_item.get_db_connection")
     def test_lambda_handler_update_item_throws_error_if_row_not_returned(self, mock_get_db_connection):
-        setup_mock_db(mock_get_db_connection, fetchone=())
+        setup_mock_db(mock_get_db_connection, fetchone={})
 
         event = {'pathParameters' : {'id' : '1'}, 'body' : json.dumps({'name' : 'Updated', 'price': 1.99, 'description': 'Test Item Description'})}
         

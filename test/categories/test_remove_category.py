@@ -6,14 +6,10 @@ from api.categories.remove_category.remove_category import lambda_handler
 from test.helper_funcs.setup_mock_db import setup_mock_db
 
 class TestRemoveCategory(unittest.TestCase):
-    def setUp(self):
-        self.mock_description = [
-            ("id",), ("name",), ("created_at",)
-        ]
 
     @patch("api.categories.remove_category.remove_category.get_db_connection")
     def test_lambda_handler_removes_expected_category(self, mock_get_db_connection):
-        setup_mock_db(mock_get_db_connection, fetchone=(1,),description=self.mock_description)
+        setup_mock_db(mock_get_db_connection, fetchone=(1,))
 
         event = {'pathParameters' : {'id' : '1'}}
 

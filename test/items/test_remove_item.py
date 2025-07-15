@@ -6,14 +6,10 @@ from api.items.remove_item.remove_item import lambda_handler
 from test.helper_funcs.setup_mock_db import setup_mock_db
 
 class TestRemoveItem(unittest.TestCase):
-    def setUp(self):
-        self.mock_description = [
-            ("id",), ("name",), ("price",), ("description",), ("created_at",)
-        ]
 
     @patch("api.items.remove_item.remove_item.get_db_connection")
     def test_lambda_handler_removes_expected_item(self, mock_get_db_connection):
-        setup_mock_db(mock_get_db_connection, fetchone=(1,), description=self.mock_description)
+        setup_mock_db(mock_get_db_connection, fetchone=(1,))
 
         event = {'pathParameters' : {'id' : '1'}}
 

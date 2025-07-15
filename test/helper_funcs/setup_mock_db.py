@@ -4,13 +4,11 @@ def setup_mock_db(
     mock_get_db_connection,
     fetchone = None,
     fetchall = None,
-    side_effect = None,
-    description= None,
+    side_effect = None
 ):
     mock_cursor = MagicMock()
     mock_cursor.fetchone.return_value = fetchone
     mock_cursor.fetchall.return_value = fetchall
-    mock_cursor.description = description
     
     if side_effect is not None:
         mock_cursor.fetchone.side_effect = side_effect
