@@ -1,5 +1,5 @@
 import json
-import psycopg2
+import psycopg2.extras
 from utils.logger import logger
 from utils.db_connection import get_db_connection
 from utils.json_default import json_default
@@ -9,7 +9,7 @@ from utils.lambda_exception_handler_wrapper import lambda_exception_handler_wrap
 def post_order_to_db():
     try:
         with get_db_connection() as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
                 cursor.execute(
                     """
                     INSERT INTO orders
@@ -24,12 +24,8 @@ def post_order_to_db():
                     logger.error("Failed to create order - no result returned")
                     raise DatabaseInsertError("Failed to create order - no result returned")
                 
-                colnames = [desc[0] for desc in cursor.description]
-                order = dict(zip(colnames, response))
-                conn.commit()
-                
                 logger.info(f"Order creation successful")
-                return order
+                return response
     
     except psycopg2.Error as e:
         logger.error(f"Database error while creating order: {e}")
