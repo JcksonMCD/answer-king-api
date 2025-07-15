@@ -27,7 +27,6 @@ def post_item_to_db(item):
                 
                 colnames = [desc[0] for desc in cursor.description]
                 item_dict = dict(zip(colnames, response))
-                conn.commit()
 
                 logger.info(f"Successfully created item: {item.name}")
                 return item_dict
