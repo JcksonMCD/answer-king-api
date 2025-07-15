@@ -1,5 +1,5 @@
 import json
-import psycopg2
+import psycopg2.extras
 from utils.logger import logger
 from utils.db_connection import get_db_connection
 from utils.json_default import json_default
@@ -8,7 +8,7 @@ from utils.lambda_exception_handler_wrapper import lambda_exception_handler_wrap
 def get_all_items_from_db():
     try:
         with get_db_connection() as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
                 cursor.execute("""
                                SELECT id, name, price, description, created_at 
                                FROM items 
@@ -21,12 +21,9 @@ def get_all_items_from_db():
                 if not rows:
                     logger.info('No items found in databse')
                     return []
-                
-                columns = [desc[0] for desc in cursor.description]
-                items = [dict(zip(columns, row)) for row in rows]
 
-                logger.info(f"Successfully retrieved {len(items)} items")
-                return items
+                logger.info(f"Successfully retrieved {len(rows)} items")
+                return rows
                 
     except psycopg2.Error as e:
         logger.error(f"Database error while fetching all items: {e}")

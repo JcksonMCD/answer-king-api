@@ -1,5 +1,5 @@
 import json
-import psycopg2
+import psycopg2.extras
 from utils.logger import logger
 from utils.db_connection import get_db_connection
 from utils.validation import validate_item_event_body
@@ -10,7 +10,7 @@ from utils.lambda_exception_handler_wrapper import lambda_exception_handler_wrap
 def post_item_to_db(item):
     try:
         with get_db_connection() as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
                 cursor.execute(
                     """
                     INSERT INTO items (name, price, description)
@@ -24,12 +24,9 @@ def post_item_to_db(item):
                 if not response:
                     logger.error("Failed to insert item - no result returned")
                     raise DatabaseInsertError("Failed to insert item - no result returned")
-                
-                colnames = [desc[0] for desc in cursor.description]
-                item_dict = dict(zip(colnames, response))
 
                 logger.info(f"Successfully created item: {item.name}")
-                return item_dict
+                return response
                 
     except psycopg2.Error as e:
         logger.error(f"Database error while creating item: {e}")

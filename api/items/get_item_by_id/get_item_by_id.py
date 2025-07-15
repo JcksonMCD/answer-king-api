@@ -1,5 +1,5 @@
 import json
-import psycopg2
+import psycopg2.extras
 from utils.logger import logger
 from utils.db_connection import get_db_connection
 from utils.json_default import json_default
@@ -10,7 +10,7 @@ from utils.lambda_exception_handler_wrapper import lambda_exception_handler_wrap
 def get_item_from_db(item_id):
     try:
         with get_db_connection() as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
                 cursor.execute(
                     """
                     SELECT id, name, price, description, created_at 
@@ -24,12 +24,9 @@ def get_item_from_db(item_id):
                 if not row:
                     logger.info(f"Active Item with ID {item_id} not found.")
                     raise ActiveResourceNotFoundError(f"Active Item with ID {item_id} not found")
-                
-                colnames = [desc[0] for desc in cursor.description]
-                item = dict(zip(colnames, row))
 
                 logger.info(f'Successfully retrieved item with ID: {item_id}')
-                return item
+                return row
     
     except psycopg2.Error as e:
         logger.error(f"Database error while fetching item: {e}")
