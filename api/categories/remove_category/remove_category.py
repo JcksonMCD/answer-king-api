@@ -24,8 +24,6 @@ def delete_category_from_db(category_id):
                 if not deleted:
                     logger.info(f"Category with ID {category_id} not found for deletion.")
                     raise ResourceNotFoundError(f"Category with ID {category_id} not found")
-
-                conn.commit()
                 
                 deleted_id = deleted[0]
                 return deleted_id

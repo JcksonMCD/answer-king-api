@@ -1,5 +1,5 @@
 import json
-import psycopg2
+import psycopg2.extras
 from utils.logger import logger
 from utils.db_connection import get_db_connection
 from utils.validation import validate_category_event_body, extract_id_path_param
@@ -10,7 +10,7 @@ from utils.lambda_exception_handler_wrapper import lambda_exception_handler_wrap
 def update_category_in_db(category_id, category):
     try:
         with get_db_connection() as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
                 cursor.execute(
                     """
                     UPDATE categories
@@ -24,11 +24,8 @@ def update_category_in_db(category_id, category):
                 if not row:
                     logger.info(f"Category with ID {category_id} not found.")
                     raise ActiveResourceNotFoundError(f"Category with ID {category_id} not found")
-                
-                colnames = [desc[0] for desc in cursor.description]
-                category = dict(zip(colnames, row))
 
-                return category
+                return row
         
     except psycopg2.Error as e:
         logger.error(f"Database error while updating category: {e}")

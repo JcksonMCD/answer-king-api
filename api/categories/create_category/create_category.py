@@ -1,5 +1,5 @@
 import json
-import psycopg2
+import psycopg2.extras
 from utils.db_connection import get_db_connection
 from utils.validation import validate_category_event_body
 from utils.json_default import json_default
@@ -10,7 +10,7 @@ from utils.lambda_exception_handler_wrapper import lambda_exception_handler_wrap
 def post_category_to_db(category):
     try:
         with get_db_connection() as conn:
-            with conn.cursor() as cursor:
+            with conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
                 cursor.execute(
                     """
                     INSERT INTO categories (name)
@@ -24,11 +24,8 @@ def post_category_to_db(category):
                 if not response:
                     logger.error("Failed to insert category - no result returned")
                     raise DatabaseInsertError("Failed to create category", status_code=500)
-
-                columns = [desc[0] for desc in cursor.description]
-                category_data = dict(zip(columns, response))
                 
-                return category_data
+                return response
            
     except psycopg2.Error as e:
         logger.error(f"Database error while creating category: {e}")
