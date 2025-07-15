@@ -7,7 +7,7 @@ from utils.json_default import json_default
 from utils.custom_exceptions import DatabaseInsertError
 from utils.lambda_exception_handler_wrapper import lambda_exception_handler_wrapper
 
-def post_item_to_db(name, price, description):
+def post_item_to_db(item):
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
@@ -17,7 +17,7 @@ def post_item_to_db(name, price, description):
                     VALUES (%s, %s, %s)
                     RETURNING id, name, price, description, created_at
                     """,
-                    (name, price, description))
+                    (item.name, item.price, item.description))
                 
                 response = cursor.fetchone()
 
@@ -26,11 +26,11 @@ def post_item_to_db(name, price, description):
                     raise DatabaseInsertError("Failed to insert item - no result returned")
                 
                 colnames = [desc[0] for desc in cursor.description]
-                item = dict(zip(colnames, response))
+                item_dict = dict(zip(colnames, response))
                 conn.commit()
 
-                logger.info(f"Successfully created item: {name}")
-                return item
+                logger.info(f"Successfully created item: {item.name}")
+                return item_dict
                 
     except psycopg2.Error as e:
         logger.error(f"Database error while creating item: {e}")
@@ -41,10 +41,11 @@ def post_item_to_db(name, price, description):
 
 @lambda_exception_handler_wrapper   
 def lambda_handler(event, context):
-    name, price, description = validate_item_event_body(event)
+    item = validate_item_event_body(event)
+    created_item = post_item_to_db(item)
 
-    logger.info(f"Successfully created item: {name}")
+    logger.info(f"Successfully created item: {item.name}")
     return {
         'statusCode': 201,
-        'body': json.dumps(post_item_to_db(name, price, description), default=json_default)
+        'body': json.dumps(created_item, default=json_default)
     } 

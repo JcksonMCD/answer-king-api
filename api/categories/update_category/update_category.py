@@ -7,7 +7,7 @@ from utils.json_default import json_default
 from utils.custom_exceptions import ActiveResourceNotFoundError
 from utils.lambda_exception_handler_wrapper import lambda_exception_handler_wrapper
 
-def update_category_in_db(category_id, name):
+def update_category_in_db(category_id, category):
     try:
         with get_db_connection() as conn:
             with conn.cursor() as cursor:
@@ -18,7 +18,7 @@ def update_category_in_db(category_id, name):
                     WHERE id = %s AND deleted = false
                     RETURNING id, name;
                     """,
-                    (name, category_id)
+                    (category.name, category_id)
                 )
                 row = cursor.fetchone()
                 if not row:
@@ -41,9 +41,9 @@ def update_category_in_db(category_id, name):
 def lambda_handler(event, context):
     category_id = extract_id_path_param(event)
 
-    new_category_name = validate_category_event_body(event)
+    updated_category = validate_category_event_body(event)
 
-    update_category_response = update_category_in_db(category_id, new_category_name)
+    update_category_response = update_category_in_db(category_id, updated_category)
 
     return {
         'statusCode': 200,
