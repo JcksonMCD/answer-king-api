@@ -7,16 +7,10 @@ from test.helper_funcs.setup_mock_db import setup_mock_db
 import datetime
 
 class TestGetAllItems(unittest.TestCase):
-    def setUp(self):
-        self.mock_description = [
-            ("id",), ("name",), ("price",), ("description",), ("created_at",)
-        ]
 
     @patch("api.items.get_all_items.get_all_items.get_db_connection")
     def test_lambda_handler_returns_expected_item(self, mock_get_db_connection):
-        setup_mock_db(mock_get_db_connection, fetchall=[
-            (1, "Test Item", 1.99, "Test Item Description", datetime.datetime(2025, 7, 2, 12, 0, 0))
-        ], description=self.mock_description)
+        setup_mock_db(mock_get_db_connection, fetchall=[{'id': 1, 'name': 'Test Item', 'price': 1.99, 'description': 'Test Item Description', 'created_at': '2025-07-02T12:00:00'}])
 
         expectedResponseBody = [{'id': 1, 'name': 'Test Item', 'price': 1.99, 'description': 'Test Item Description', 'created_at': '2025-07-02T12:00:00'}]
 
@@ -27,9 +21,8 @@ class TestGetAllItems(unittest.TestCase):
 
     @patch("api.items.get_all_items.get_all_items.get_db_connection")
     def test_lambda_handler_returns_expected_items(self, mock_get_db_connection):
-        setup_mock_db(mock_get_db_connection, fetchall=[(1, "Test Item", 1.99, "Test Item Description", datetime.datetime(2025, 7, 2, 12, 0, 0)),
-                                                        (2, "Test Item 2", 2.99, "Test Item 2 Description", datetime.datetime(2025, 7, 2, 12, 0, 0))
-                                                        ],description=self.mock_description)
+        setup_mock_db(mock_get_db_connection, fetchall=[{'id': 1, 'name': 'Test Item', 'price': 1.99, 'description': 'Test Item Description', 'created_at': '2025-07-02T12:00:00'}, 
+                                                        {'id': 2, 'name': 'Test Item 2', 'price': 2.99, 'description': 'Test Item 2 Description', 'created_at': '2025-07-02T12:00:00'}])
 
         expectedResponseBody = [{'id': 1, 'name': 'Test Item', 'price': 1.99, 'description': 'Test Item Description', 'created_at': '2025-07-02T12:00:00'}, 
                                 {'id': 2, 'name': 'Test Item 2', 'price': 2.99, 'description': 'Test Item 2 Description', 'created_at': '2025-07-02T12:00:00'}]
@@ -41,7 +34,7 @@ class TestGetAllItems(unittest.TestCase):
 
     @patch("api.items.get_all_items.get_all_items.get_db_connection")
     def test_lambda_handler_returns_empty_list_if_empty_db_return(self, mock_get_db_connection):
-        setup_mock_db(mock_get_db_connection, fetchall={}, description=self.mock_description)
+        setup_mock_db(mock_get_db_connection, fetchall={})
 
         expectedResponseBody = []
 

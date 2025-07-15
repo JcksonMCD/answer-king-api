@@ -7,14 +7,10 @@ from test.helper_funcs.setup_mock_db import setup_mock_db
 import datetime
 
 class TestCreateItem(unittest.TestCase):
-    def setUp(self):
-        self.mock_description = [
-            ("id",), ("name",), ("price",), ("description",), ("created_at",)
-        ]
 
     @patch("api.items.create_item.create_item.get_db_connection")
     def test_lambda_handler_creates_expected_item(self, mock_get_db_connection):
-        setup_mock_db(mock_get_db_connection, fetchone=(1, 'Created', 1.99, 'Created iteam', datetime.datetime(2025, 7, 2, 12, 0, 0)), description=self.mock_description)
+        setup_mock_db(mock_get_db_connection, fetchone={'id': 1, 'name' : 'Created', 'price' : 1.99, 'description': 'Created iteam', 'created_at': '2025-07-02T12:00:00'})
 
         event = {'body' : json.dumps({'name' : 'Created', 'price' : 1.99, 'description': 'Created iteam'})}
         expectedResponseBody = {'id': 1, 'name' : 'Created', 'price' : 1.99, 'description': 'Created iteam', 'created_at': '2025-07-02T12:00:00'}
@@ -26,7 +22,7 @@ class TestCreateItem(unittest.TestCase):
 
     @patch("api.items.create_item.create_item.get_db_connection")
     def test_lambda_handler_create_item_runs_with_description_missing(self, mock_get_db_connection):
-        setup_mock_db(mock_get_db_connection, fetchone=(1, 'Created', 1.99, None, datetime.datetime(2025, 7, 2, 12, 0, 0)), description=self.mock_description)
+        setup_mock_db(mock_get_db_connection, {'id': 1, 'name' : 'Created', 'price' : 1.99, 'description': None, 'created_at': '2025-07-02T12:00:00'})
 
         event = {'body' : json.dumps({'name' : 'Created', 'price' : 1.99})}
         expectedResponseBody = {'id': 1, 'name' : 'Created', 'price' : 1.99, 'description': None, 'created_at': '2025-07-02T12:00:00'}
@@ -50,7 +46,7 @@ class TestCreateItem(unittest.TestCase):
     
     @patch("api.items.create_item.create_item.get_db_connection")
     def test_lambda_handler_create_item_throws_error_when_db_returns_nothing(self, mock_get_db_connection):
-        setup_mock_db(mock_get_db_connection, fetchone=())
+        setup_mock_db(mock_get_db_connection, fetchone={})
 
         event = {'body' : json.dumps({'name' : 'Created', 'price' : 1.99, 'description': 'Created iteam'})}
 
