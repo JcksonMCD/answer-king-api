@@ -6,14 +6,10 @@ from api.categories.update_category.update_category import lambda_handler
 from test.helper_funcs.setup_mock_db import setup_mock_db
 
 class TestUpdateCategory(unittest.TestCase):
-    def setUp(self):
-        self.mock_description = [
-            ("id",), ("name",), ("created_at",)
-        ]
 
     @patch("api.categories.update_category.update_category.get_db_connection")
     def test_lambda_handler_updates_expected_category(self, mock_get_db_connection):
-        setup_mock_db(mock_get_db_connection, fetchone=(1, "Updated"), description=self.mock_description)
+        setup_mock_db(mock_get_db_connection, fetchone={'id': 1, 'name': 'Updated'})
 
         event = {'pathParameters' : {'id' : '1'}, 'body' : json.dumps({'name' : 'Updated'})}
         expectedResponseBody = {'id': 1, 'name': 'Updated'}
@@ -25,7 +21,7 @@ class TestUpdateCategory(unittest.TestCase):
 
     @patch("api.categories.update_category.update_category.get_db_connection")
     def test_lambda_handler_update_category_throws_error_if_row_not_returned(self, mock_get_db_connection):
-        setup_mock_db(mock_get_db_connection, fetchone=())
+        setup_mock_db(mock_get_db_connection, fetchone={})
 
         event = {'pathParameters' : {'id' : '1'}, 'body' : json.dumps({'name' : 'Updated'})}
         
