@@ -2,10 +2,9 @@ import unittest
 import psycopg2
 from unittest.mock import patch
 import json
-import datetime
 from api.orders.create_order.create_order import lambda_handler, post_order_to_db
 from test.helper_funcs.setup_mock_db import setup_mock_db
-from api.lambda_layers.utils.python.utils.custom_exceptions import DatabaseInsertError
+from utils.custom_exceptions import DatabaseInsertError
 
 
 class TestCreateOrder(unittest.TestCase):

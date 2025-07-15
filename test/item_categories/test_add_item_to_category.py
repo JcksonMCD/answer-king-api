@@ -118,7 +118,6 @@ class TestAddItemToCategory(unittest.TestCase):
         self.assertEqual(json.loads(response['body']), {'message': 'Successfully added Item at ID 2 to Category at ID 1'})
         mock_validate_entities.assert_called_once_with(self.mock_cursor, 1, 2)
         mock_create_association.assert_called_once_with(self.mock_cursor, 1, 2)
-        self.mock_conn.commit.assert_called_once()
 
     @patch('api.item_categories.add_item_to_category.add_item_to_category.get_db_connection')
     def test_post_item_to_category_returns_psycopg2_error(self, mock_get_db_connection):

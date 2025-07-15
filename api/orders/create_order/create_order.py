@@ -26,7 +26,7 @@ def post_order_to_db():
                 
                 logger.info(f"Order creation successful")
                 return response
-    
+
     except psycopg2.Error as e:
         logger.error(f"Database error while creating order: {e}")
         raise
