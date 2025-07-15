@@ -24,9 +24,7 @@ def remove_item_from_db(item_id):
                 if not deleted:
                     logger.info(f"Item with ID {item_id} not found.")
                     raise ResourceNotFoundError(f"Item with ID {item_id} not found")
-                
-                conn.commit()
-                
+                                
                 logger.info(f'Successfully processed DELETE request for item ID: {item_id}')
 
     except psycopg2.Error as e:

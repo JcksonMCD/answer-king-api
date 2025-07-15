@@ -28,7 +28,6 @@ def update_item_in_db(item_id, item):
                 
                 colnames = [desc[0] for desc in cursor.description]
                 item = dict(zip(colnames, row))
-                conn.commit()
             
                 logger.info(f'Successfully update item with ID: {item_id}')
                 return item

@@ -37,9 +37,7 @@ def post_item_to_category_in_db(category_id, item_id):
                 validate_entities_exist(cursor, category_id, item_id)
                 
                 create_item_category_association(cursor, category_id, item_id)
-                
-                conn.commit()
-                
+                                
                 message = f'Successfully added Item at ID {item_id} to Category at ID {category_id}'
                 logger.info(message)   
                 return {
