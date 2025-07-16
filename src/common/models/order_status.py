@@ -1,0 +1,8 @@
+from enum import Enum
+
+class Status(Enum):
+  PENDING = "PENDING"
+  PROCESSING = "PROCESSING"
+  SHIPPED = "SHIPPED"
+  DELIVERED = "DELIVERED"
+  CANCELLED = "CANCELLED" 
